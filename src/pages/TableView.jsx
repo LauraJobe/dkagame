@@ -4,6 +4,7 @@ import { db, ensureSignedIn } from '../firebase.js';
 import { listen } from '../room.js';
 import { TABLES } from '../engine/game.js';
 import { ORDER_SPEC } from '../ui/orderSpec.js';
+import ProtocolPanel from '../components/ProtocolPanel.jsx';
 
 export default function TableView({ code, tableId }) {
   const table = TABLES.find((t) => t.id === tableId);
@@ -12,6 +13,8 @@ export default function TableView({ code, tableId }) {
   const [mine, setMine] = useState(null);
   const [error, setError] = useState('');
   const [sbarFor, setSbarFor] = useState(null);
+  const [showProtocol, setShowProtocol] = useState(false);
+  const [showReport, setShowReport] = useState(true);
   const base = `rooms/${code}/tables/${tableId}`;
 
   useEffect(() => {
@@ -57,6 +60,16 @@ export default function TableView({ code, tableId }) {
           <div className="clock-scene">{meta?.sceneTitle || 'Waiting for instructor'}</div>
         </div>
       </header>
+
+      <div className="table-tools">
+        <button className="btn btn-protocol" onClick={() => setShowProtocol(true)}>DKA protocol</button>
+        {meta?.report && (
+          <button className="btn btn-ghost" onClick={() => setShowReport(!showReport)}>
+            {showReport ? 'Hide shift report' : 'Shift report'}
+          </button>
+        )}
+      </div>
+      {showReport && meta?.report && <div className="report-box">{meta.report}</div>}
 
       {error && <p className="error">{error}</p>}
 
@@ -119,6 +132,7 @@ export default function TableView({ code, tableId }) {
         </button>
       </div>
 
+      {showProtocol && <ProtocolPanel tableId={tableId} dark onClose={() => setShowProtocol(false)} />}
       {sbarFor && <SbarModal spec={sbarFor} onCancel={() => setSbarFor(null)} onSend={(text) => sendRequest(sbarFor.key, text)} />}
     </div>
   );

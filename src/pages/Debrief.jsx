@@ -33,8 +33,8 @@ export default function Debrief({ game, onBack, onLeave }) {
           <div className="hs-sub">Our Jordan (solid) vs. the protocol-only Jordan (dashed). Green band = target range.</div>
         </div>
         <div className="host-actions">
-          <button className="btn btn-ghost" onClick={onBack}>Back to game</button>
-          <button className="btn btn-ghost" onClick={onLeave}>Close room</button>
+          {onBack && <button className="btn btn-ghost" onClick={onBack}>Back to game</button>}
+          {onLeave && <button className="btn btn-ghost" onClick={onLeave}>Close room</button>}
         </div>
       </header>
 

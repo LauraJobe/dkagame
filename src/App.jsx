@@ -3,12 +3,14 @@ import Home from './pages/Home.jsx';
 import Host from './pages/Host.jsx';
 import Join from './pages/Join.jsx';
 import TableView from './pages/TableView.jsx';
+import Screen from './pages/Screen.jsx';
 
 // Hash routes work on GitHub Pages without server config:
 // #/            home
 // #/host        instructor dashboard
 // #/join        pick a room and table
 // #/t/CODE/ID   a table's screen
+// #/screen/CODE projector view (read-only)
 function parse() {
   const parts = window.location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
   return parts;
@@ -25,6 +27,7 @@ export default function App() {
   const [first, a, b] = route;
   if (first === 'host') return <Host />;
   if (first === 'join') return <Join initialCode={a} />;
+  if (first === 'screen' && a) return <Screen code={a.toUpperCase()} />;
   if (first === 't' && a && b) return <TableView code={a.toUpperCase()} tableId={b} />;
   return <Home />;
 }

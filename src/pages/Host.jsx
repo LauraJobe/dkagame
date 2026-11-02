@@ -6,6 +6,7 @@ import { newGame, runBeat, startScene, finishScene, mergeOrders, ordersForTable,
 import { isResolved, ONE_TIME_ORDERS } from '../engine/model.js';
 import { ORDER_LABELS } from '../ui/orderSpec.js';
 import Debrief from './Debrief.jsx';
+import ProtocolPanel from '../components/ProtocolPanel.jsx';
 
 const STORE_KEY = 'dka-host-room';
 
@@ -19,6 +20,7 @@ export default function Host() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [checklist, setChecklist] = useState({});
+  const [showProtocol, setShowProtocol] = useState(false);
 
   // Sign in, then resume this browser's room if it still exists.
   useEffect(() => {
@@ -168,6 +170,13 @@ export default function Host() {
           <div className="hs-sub">Hour {p.hour} · Beat {game.beat} of {scene.beats}</div>
         </div>
         <div className="host-actions">
+          <button
+            className="btn btn-gold"
+            onClick={() => window.open(`${window.location.pathname}#/screen/${code}`, 'dka-projector')}
+          >
+            Open projector view ↗
+          </button>
+          <button className="btn btn-ghost" onClick={() => setShowProtocol(true)}>DKA protocol</button>
           <button className="btn btn-ghost" onClick={() => setShowTruth(!showTruth)}>
             {showTruth ? 'Hide instructor panel' : 'Instructor panel'}
           </button>
@@ -239,6 +248,16 @@ export default function Host() {
           ))}
         </section>
 
+        <section className="panel howto">
+          <h2>Running this room</h2>
+          <ol>
+            <li>Click <strong>Open projector view</strong> and drag that window onto the classroom screen, then click <strong>Full screen</strong> there. Students see the room code, report, and table status, but never the answers.</li>
+            <li>Keep this page on your laptop or tablet to run hours, answer provider calls, and open the instructor panel.</li>
+            <li>One screen only? Project the projector view and switch back to this tab to run each hour.</li>
+          </ol>
+        </section>
+
+        {showProtocol && <ProtocolPanel onClose={() => setShowProtocol(false)} />}
         {showTruth && <TruthPanel game={game} tables={tables} checklist={checklist} setChecklist={setChecklist} onRestart={restartScene} onLeave={leave} />}
       </main>
     </div>

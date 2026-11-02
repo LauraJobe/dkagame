@@ -11,7 +11,7 @@ export const SCENES = [
     report:
       'Jordan Reyes, 22, type 1 diabetes since age 12. Flu for 3 days, stopped eating, skipped insulin. ' +
       'The ED gave 1 liter of 0.9% NaCl; it is running at 250 mL/hr through one of two 20 g IVs. No insulin yet. ' +
-      'Admitting labs are on your monitors. You are working under the nurse-driven DKA protocol.',
+      'Admitting labs are on your monitors. You are working under the nurse-driven DKA protocol: tap DKA protocol on your screen to read it.',
     preset: (variant) => ({
       hour: 0,
       deficitL: 4.0,
