@@ -177,8 +177,21 @@ function OrderControl({ spec, value, request, disabled, onChange, onRequest }) {
       </div>
     );
   }
-  // approval
   const status = request?.status;
+  if (spec.kind === 'call') {
+    return (
+      <div className="order">
+        <span>{spec.label}</span>
+        {status === 'pending' && <span className="pill">Provider reading your SBAR</span>}
+        {status === 'approved' && <span className="pill ok">Provider agreed</span>}
+        {status === 'declined' && <span className="pill no">Provider disagreed</span>}
+        {status !== 'pending' && (
+          <button className="btn btn-ghost" disabled={disabled} onClick={onRequest}>Call provider</button>
+        )}
+      </div>
+    );
+  }
+  // approval
   return (
     <div className="order">
       <span>{spec.label} <em className="needs">provider order</em></span>
@@ -198,7 +211,7 @@ function SbarModal({ spec, onCancel, onSend }) {
   return (
     <div className="modal-back" role="dialog" aria-modal="true">
       <div className="modal">
-        <h3>Call the provider: {spec.label}</h3>
+        <h3>{spec.kind === 'call' ? 'Call the provider' : `Call the provider: ${spec.label}`}</h3>
         <p className="muted">Give a short SBAR. The instructor reads it and approves or declines.</p>
         <textarea
           value={text}

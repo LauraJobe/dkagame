@@ -14,6 +14,10 @@ export default function Home() {
           <a className="btn btn-primary btn-lg" href="#/join">Join a table</a>
           <a className="btn btn-ghost btn-lg" href="#/host">I'm the instructor</a>
         </div>
+        <div className="home-links">
+          <a href="#/guide">Teacher guide</a>
+          <a href="#/print">Print student materials</a>
+        </div>
         <p className="fine">No student accounts or names are collected. Rooms delete themselves after 24 hours.</p>
       </div>
     </div>

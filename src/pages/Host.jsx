@@ -136,6 +136,10 @@ export default function Host() {
           </fieldset>
           <button className="btn btn-primary btn-lg" disabled={busy} onClick={create}>Create room</button>
           {error && <p className="error">{error}</p>}
+          <div className="home-links">
+            <a href="#/guide" target="_blank" rel="noreferrer">Teacher guide</a>
+            <a href="#/print" target="_blank" rel="noreferrer">Print student materials</a>
+          </div>
         </div>
       </div>
     );
@@ -177,6 +181,7 @@ export default function Host() {
             Open projector view ↗
           </button>
           <button className="btn btn-ghost" onClick={() => setShowProtocol(true)}>DKA protocol</button>
+          <a className="btn btn-ghost" href="#/guide" target="_blank" rel="noreferrer">Teacher guide</a>
           <button className="btn btn-ghost" onClick={() => setShowTruth(!showTruth)}>
             {showTruth ? 'Hide instructor panel' : 'Instructor panel'}
           </button>
@@ -238,11 +243,15 @@ export default function Host() {
           {pending.length === 0 && <p className="muted">No calls waiting.</p>}
           {pending.map(({ table, key, r }) => (
             <div key={table.id + key} className="request" style={{ '--tc': table.color }}>
-              <div className="req-head"><strong>{table.name}</strong> requests <strong>{ORDER_LABELS[key]}</strong></div>
+              <div className="req-head">
+                {key === 'call'
+                  ? <><strong>{table.name}</strong> is calling you</>
+                  : <><strong>{table.name}</strong> requests <strong>{ORDER_LABELS[key]}</strong></>}
+              </div>
               <pre className="sbar">{r.sbar}</pre>
               <div className="req-actions">
-                <button className="btn btn-ghost" onClick={() => decide(table.id, key, 'declined')}>Decline</button>
-                <button className="btn btn-primary" onClick={() => decide(table.id, key, 'approved')}>Approve</button>
+                <button className="btn btn-ghost" onClick={() => decide(table.id, key, 'declined')}>{key === 'call' ? 'Disagree' : 'Decline'}</button>
+                <button className="btn btn-primary" onClick={() => decide(table.id, key, 'approved')}>{key === 'call' ? 'Agree' : 'Approve'}</button>
               </div>
             </div>
           ))}

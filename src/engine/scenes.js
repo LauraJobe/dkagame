@@ -69,8 +69,9 @@ export const SCENES = [
       3: (p) => ({
         table: 'metabolic',
         severity: 'info',
-        title: 'The provider asks',
-        text: `"Glucose is ${Math.round(p.glucose)}. Can we stop the insulin drip?" Decide as a class before the next beat.`,
+        title: 'New provider order',
+        text: `Dr. Patel calls the Metabolic table: "Glucose is ${Math.round(p.glucose)}. Stop the insulin drip." ` +
+          'Is this order safe for Jordan right now? Carry it out, or call the provider to clarify it before the next hour.',
       }),
     },
   },

@@ -206,3 +206,64 @@ p { line-height: 1.5; }
 .tile.big .tile-name { font-size: 1.3rem; }
 .tile.big .tile-state { font-size: 1.05rem; }
 .screen-note { font-size: 1.3rem; font-weight: 600; color: var(--accent); margin-top: 1rem; }
+
+.home-links { display: flex; gap: 1.2rem; margin-top: 1rem; flex-wrap: wrap; }
+.home-links a { color: var(--accent); font-weight: 600; }
+
+/* Teacher guide */
+.doc { max-width: 980px; margin: 0 auto; padding: 24px 20px 64px; background: var(--surface); min-height: 100vh; }
+.doc-nav { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.doc-nav a:not(.btn) { color: var(--accent); font-weight: 600; }
+.doc-nav .btn { margin-left: auto; }
+.doc h2 { color: var(--accent); text-transform: none; letter-spacing: 0; font-size: 1.4rem; margin-top: 2rem; border-bottom: 2px solid var(--gold); padding-bottom: 0.3rem; }
+.doc h3 { margin-top: 1.2rem; }
+.doc-lead { font-size: 1.15rem; color: var(--muted); }
+.doc p, .doc li { line-height: 1.6; }
+.doc-table { width: 100%; border-collapse: collapse; margin: 0.6rem 0 1rem; font-size: 0.95rem; }
+.doc-table th, .doc-table td { border: 1px solid var(--line); padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+.doc-table th { background: var(--bg); }
+.doc-scene { margin-bottom: 1rem; }
+.doc-trap { background: #fff7e6; border-left: 4px solid var(--warn); padding: 0.6rem 0.8rem; border-radius: 6px; }
+.doc-answer { color: var(--accent); }
+
+/* Print materials */
+.print-root { background: var(--bg); min-height: 100vh; }
+.print-controls { max-width: 900px; margin: 0 auto; padding: 24px 20px; }
+.print-pick { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+.print-pick fieldset { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; display: grid; gap: 0.4rem; background: var(--surface); min-width: 260px; }
+.sheets { display: grid; gap: 24px; justify-items: center; padding: 0 16px 48px; }
+.sheet { background: #fff; width: 8.5in; max-width: 100%; min-height: 11in; padding: 0.6in 0.65in; box-shadow: 0 2px 12px rgba(0,0,0,0.08); color: #111; font-size: 11pt; }
+.sheet-head { border-bottom: 4px solid var(--tc); margin-bottom: 0.8rem; padding-bottom: 0.4rem; }
+.sheet-kicker { text-transform: uppercase; letter-spacing: 0.1em; font-size: 9pt; color: #555; font-weight: 700; }
+.sheet-title { font-size: 22pt; color: var(--tc); text-transform: none; letter-spacing: 0; margin: 0.1rem 0 0; }
+.sheet-lead { font-size: 12pt; }
+.sheet h3 { font-size: 12pt; margin: 0.9rem 0 0.3rem; color: #111; text-transform: none; letter-spacing: 0; }
+.sheet ul, .sheet ol { margin: 0.2rem 0; padding-left: 1.2rem; line-height: 1.45; }
+.sheet-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.sheet-two { columns: 2; column-gap: 1.4rem; }
+.sheet-protocol { break-inside: avoid; margin-bottom: 0.55rem; }
+.sheet-table { width: 100%; border-collapse: collapse; margin-top: 0.3rem; }
+.sheet-table td { border: 1px solid #bbb; padding: 0.4rem 0.5rem; vertical-align: top; }
+.sheet-table td.blank { width: 32%; color: #888; }
+.sbar-table td { height: 1.1in; }
+.sbar-table td.fill { color: #555; font-style: italic; }
+.sheet-table .small { font-size: 9pt; color: #555; margin-top: 0.2rem; }
+.sheet-fine { font-size: 8.5pt; color: #666; margin-top: 0.8rem; }
+.ticket-q { margin-bottom: 1rem; }
+.write-lines { height: 2.1in; background: repeating-linear-gradient(transparent, transparent 0.32in, #bbb 0.32in, #bbb 0.33in); }
+
+@media print {
+  @page { size: letter; margin: 0; }
+  body, .print-root { background: #fff; }
+  .no-print { display: none !important; }
+  .sheets { display: block; padding: 0; }
+  .sheet { box-shadow: none; width: auto; min-height: auto; page-break-after: always; break-after: page; }
+  .sheet:last-child { page-break-after: auto; break-after: auto; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+.sheet.compact { font-size: 9.5pt; }
+.sheet.compact .sheet-title { font-size: 17pt; }
+.sheet.compact .sheet-lead { font-size: 10pt; }
+.sheet.compact ul { line-height: 1.32; }
+.sheet-protocol.big { font-size: 12pt; margin-bottom: 0.9rem; }
+.sheet-protocol.big ul { line-height: 1.55; }

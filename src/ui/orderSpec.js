@@ -57,6 +57,10 @@ export const ORDER_SPEC = {
   ],
 };
 
+// Every table can call the provider with an SBAR (no direct effect on the patient).
+const CALL = { key: 'call', label: 'Call the provider (SBAR)', kind: 'call' };
+for (const list of Object.values(ORDER_SPEC)) list.push(CALL);
+
 export const ORDER_LABELS = Object.fromEntries(
   Object.values(ORDER_SPEC).flat().map((o) => [o.key, o.label]),
 );
