@@ -2,6 +2,41 @@
 // lab values carry the hour they were drawn so tables can tell when they are stale.
 const r1 = (v) => Math.round(v * 10) / 10;
 
+export function ecgPattern(k) {
+  if (k <= 2.3) return 'vt';
+  if (k < 2.6) return 'pvcs';
+  if (k < 3.0) return 'uWaves';
+  if (k < 3.5) return 'flatT';
+  if (k < 5.5) return 'normal';
+  if (k < 6.5) return 'peaked';
+  return 'wide';
+}
+
+// Values for each table's animated picture: only what that table can see or controls.
+export function buildAnimations(game) {
+  const p = game.patient;
+  const L = game.labs;
+  const o = game.orders || {};
+  return {
+    cardio: { hr: Math.round(p.hr), map: Math.round(p.map), ecg: ecgPattern(p.k), fluidRate: o.fluidRate || 0, fluidType: o.fluidType || 'NS' },
+    resp: { rr: p.rr, kussmaul: p.ph < 7.25 && !p.intubated, crackles: p.lungs !== 'Clear', spo2: p.spo2, ventilated: Boolean(p.intubated) },
+    renal: { uo: Math.round(p.uo), k: L.bmp.k, shifting: (o.insulinRate || 0) > 0, kclIn: (o.kclPerL || 0) > 0 || Boolean(o.kRider) },
+    metabolic: { glucose: L.poc.value, insulin: o.insulinRate || 0, dextrose: o.dextrose || 0, bhb: L.bhb.value },
+    neuro: { gcs: p.gcs, pressure: p.edemaRisk >= 3 ? 2 : p.edemaRisk >= 2 ? 1 : 0, sweaty: p.glucose < 70, headache: p.headache !== 'None' },
+  };
+}
+
+// Overall status per table for the projector picture (green 2, yellow 1, red 0 per gauge).
+export function tableStatus(score) {
+  if (!score) return null;
+  const out = {};
+  for (const [t, g] of Object.entries(score.gauges)) {
+    const sum = g[0] + g[1];
+    out[t] = sum >= 4 ? 'green' : sum >= 2 ? 'yellow' : 'red';
+  }
+  return out;
+}
+
 export function buildMonitors(game) {
   const p = game.patient;
   const L = game.labs;
@@ -59,5 +94,5 @@ export function buildMonitors(game) {
     lab('Serum osmolality', L.bmp.osm, 'mOsm/kg', L.bmp.hour),
   ];
 
-  return { cardio, resp, renal, metabolic, neuro, hour };
+  return { cardio, resp, renal, metabolic, neuro, hour, anim: buildAnimations(game) };
 }

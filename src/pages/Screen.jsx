@@ -3,6 +3,7 @@ import { ensureSignedIn } from '../firebase.js';
 import { listen } from '../room.js';
 import { TABLES } from '../engine/game.js';
 import Debrief from './Debrief.jsx';
+import Patient from '../components/Patient.jsx';
 
 // Read-only view for the classroom screen. The instructor runs the game from
 // the instructor page on a laptop or tablet; this window goes on the projector.
@@ -10,6 +11,7 @@ export default function Screen({ code }) {
   const [meta, setMeta] = useState(null);
   const [tables, setTables] = useState({});
   const [engine, setEngine] = useState(null);
+  const [anim, setAnim] = useState(null);
   const [full, setFull] = useState(false);
 
   useEffect(() => {
@@ -18,6 +20,7 @@ export default function Screen({ code }) {
       offs.push(listen(code, 'meta', setMeta));
       offs.push(listen(code, 'tables', (v) => setTables(v || {})));
       offs.push(listen(code, 'engine', setEngine));
+      offs.push(listen(code, 'anim', setAnim));
     });
     const onFs = () => setFull(Boolean(document.fullscreenElement));
     document.addEventListener('fullscreenchange', onFs);
@@ -45,6 +48,7 @@ export default function Screen({ code }) {
 
   const readyCount = TABLES.filter((t) => tables[t.id]?.ready).length;
   const atStart = meta && meta.sceneIdx === 0 && meta.beat === 0;
+  const struggling = meta?.status5 && Object.values(meta.status5).some((x) => x !== 'green');
 
   return (
     <div className="screen">
@@ -64,36 +68,49 @@ export default function Screen({ code }) {
       </header>
 
       {meta && (
-        <main className="screen-grid">
-          <section className="screen-panel">
-            <h2>{atStart ? 'Shift report' : 'Report'}</h2>
-            <p className="screen-report">{meta.report}</p>
-            {(meta.cards || []).length > 0 && (
-              <div className="screen-cards">
-                {meta.cards.map((c) => (
-                  <div key={c.id} className={`event-card ${c.severity}`}>
-                    <strong>{c.title} <span className="who">→ {TABLES.find((t) => t.id === c.table)?.name}</span></strong>
-                    <span>{c.text}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-          <section className="screen-panel">
-            <h2>Tables <span className="count">{readyCount} of 5 ready</span></h2>
-            <div className="screen-tiles">
-              {TABLES.map((t) => {
-                const d = tables[t.id];
-                return (
-                  <div key={t.id} className={`tile big ${d?.ready ? 'ready' : ''} ${d?.joinedAt ? '' : 'absent'}`} style={{ '--tc': t.color }}>
-                    <div className="tile-name">{t.name}</div>
-                    <div className="tile-state">{!d?.joinedAt ? 'Not joined' : d.ready ? 'Ready ✓' : 'Deciding…'}</div>
-                  </div>
-                );
-              })}
+        <main className="screen-stage">
+          <section className="patient-panel">
+            <Patient anim={anim} status={meta.status5} />
+            <p className={`patient-caption ${struggling ? 'struggling' : ''}`}>
+              {meta.beat === 0 ? 'Jordan has just arrived.' : struggling ? 'Jordan is struggling.' : 'Jordan is steady.'}
+            </p>
+            <div className="pips" aria-label={`Hour ${meta.beat} of ${meta.beats}`}>
+              {Array.from({ length: meta.beats }).map((_, i) => (
+                <span key={i} className={`pip ${i < meta.beat ? 'done' : ''} ${i === meta.beat && meta.status === 'ordering' ? 'now' : ''}`} />
+              ))}
             </div>
-            {meta.status !== 'ordering' && <p className="screen-note">Scene paused. Talk it through.</p>}
           </section>
+          <div className="screen-side">
+            <section className="screen-panel">
+              <h2>{atStart ? 'Shift report' : 'Report'}</h2>
+              <p className="screen-report">{meta.report}</p>
+              {(meta.cards || []).length > 0 && (
+                <div className="screen-cards">
+                  {meta.cards.map((c) => (
+                    <div key={c.id} className={`event-card ${c.severity}`}>
+                      <strong>{c.title} <span className="who">→ {TABLES.find((t) => t.id === c.table)?.name}</span></strong>
+                      <span>{c.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+            <section className="screen-panel" style={{ marginTop: 16 }}>
+              <h2>Tables <span className="count">{readyCount} of 5 ready</span></h2>
+              <div className="screen-tiles">
+                {TABLES.map((t) => {
+                  const d = tables[t.id];
+                  return (
+                    <div key={t.id} className={`tile big ${d?.ready ? 'ready' : ''} ${d?.joinedAt ? '' : 'absent'}`} style={{ '--tc': t.color }}>
+                      <div className="tile-name">{t.name}</div>
+                      <div className="tile-state">{!d?.joinedAt ? 'Not joined' : d.ready ? 'Ready ✓' : 'Deciding…'}</div>
+                    </div>
+                  );
+                })}
+              </div>
+              {meta.status !== 'ordering' && <p className="screen-note">Scene paused. Talk it through.</p>}
+            </section>
+          </div>
         </main>
       )}
     </div>

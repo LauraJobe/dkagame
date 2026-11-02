@@ -1,20 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ref, update, set } from 'firebase/database';
 import { db, ensureSignedIn } from '../firebase.js';
 import { listen } from '../room.js';
 import { TABLES } from '../engine/game.js';
 import { ORDER_SPEC } from '../ui/orderSpec.js';
 import ProtocolPanel from '../components/ProtocolPanel.jsx';
+import Cutaway from '../components/Cutaway.jsx';
 
 export default function TableView({ code, tableId }) {
   const table = TABLES.find((t) => t.id === tableId);
   const [meta, setMeta] = useState(null);
   const [monitor, setMonitor] = useState(null);
+  const [anim, setAnim] = useState(null);
+  const prevVals = useRef({});
+  const [changed, setChanged] = useState({});
   const [mine, setMine] = useState(null);
   const [error, setError] = useState('');
   const [sbarFor, setSbarFor] = useState(null);
   const [showProtocol, setShowProtocol] = useState(false);
-  const [showReport, setShowReport] = useState(true);
+  const [reportOpen, setShowReport] = useState(null);
   const base = `rooms/${code}/tables/${tableId}`;
 
   useEffect(() => {
@@ -25,11 +29,28 @@ export default function TableView({ code, tableId }) {
         update(ref(db, base), { joinedAt: Date.now(), uid }).catch(() => setError('This room no longer exists.'));
         offs.push(listen(code, 'meta', setMeta));
         offs.push(listen(code, `monitors/${tableId}`, setMonitor));
+        offs.push(listen(code, `anim/${tableId}`, setAnim));
         offs.push(listen(code, `tables/${tableId}`, setMine));
       })
       .catch(() => setError('Could not connect. Check the internet connection.'));
     return () => offs.forEach((off) => off());
   }, [code, tableId]);
+
+  // Flash readings whose value changed since the last hour.
+  useEffect(() => {
+    const rows = Array.isArray(monitor) ? monitor : Object.values(monitor || {});
+    const next = {};
+    const flash = {};
+    for (const r of rows) {
+      const v = String(r.value);
+      next[r.label] = v;
+      if (prevVals.current[r.label] !== undefined && prevVals.current[r.label] !== v) flash[r.label] = true;
+    }
+    prevVals.current = next;
+    setChanged(flash);
+    const t = setTimeout(() => setChanged({}), 1700);
+    return () => clearTimeout(t);
+  }, [monitor]);
 
   if (!table) return <div className="home"><p className="error">Unknown table.</p></div>;
 
@@ -39,6 +60,7 @@ export default function TableView({ code, tableId }) {
   const hour = meta?.hour ?? 0;
   const locked = !meta || meta.status !== 'ordering';
   const myCards = (meta?.cards || []).filter((c) => c.table === tableId);
+  const showReport = reportOpen ?? (meta?.beat === 0);
 
   const setOrder = (key, value) => set(ref(db, `${base}/orders/${key}`), value);
   const setReady = (v) => set(ref(db, `${base}/ready`), v);
@@ -86,11 +108,13 @@ export default function TableView({ code, tableId }) {
         </div>
       ))}
 
+      {anim && <Cutaway tableId={tableId} a={anim} />}
+
       <section className="monitor" aria-label="Your monitor">
         {(Array.isArray(monitor) ? monitor : Object.values(monitor || {})).map((row) => {
           const stale = row.kind === 'lab' && row.drawn < hour;
           return (
-            <div key={row.label} className={`reading ${row.tone || ''} ${row.kind}`}>
+            <div key={row.label} className={`reading ${row.tone || ''} ${row.kind} ${changed[row.label] ? 'changed' : ''}`}>
               <div className="reading-label">{row.label}</div>
               <div className="reading-value">
                 {row.value}
@@ -124,7 +148,7 @@ export default function TableView({ code, tableId }) {
 
       <div className="ready-bar">
         <button
-          className={`btn btn-lg ${ready ? 'btn-ready' : 'btn-primary'}`}
+          className={`btn btn-lg ${ready ? 'btn-ready' : 'btn-primary btn-act-now'}`}
           disabled={locked}
           onClick={() => setReady(!ready)}
         >

@@ -1,6 +1,6 @@
 import { ref, set, update, get, query, orderByChild, endAt, remove, onValue } from 'firebase/database';
 import { db } from './firebase.js';
-import { buildMonitors } from './engine/monitors.js';
+import { buildMonitors, tableStatus } from './engine/monitors.js';
 import { TABLES, ordersForTable, SCENES } from './engine/game.js';
 
 const ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
@@ -42,14 +42,19 @@ export function metaFor(game) {
     hour: game.patient.hour,
     variant: game.variant,
     cards: game.cards || [],
+    status5: tableStatus(game.lastScore && game.beat > 0 ? game.lastScore : null),
   };
 }
 
 // Everything the host publishes after a change in game state.
 export function publishPayload(game, { resetTables = false } = {}) {
+  const mon = buildMonitors(game);
+  const anim = mon.anim;
+  delete mon.anim;
   const payload = {
     meta: metaFor(game),
-    monitors: buildMonitors(game),
+    monitors: mon,
+    anim,
     engine: JSON.stringify(game),
   };
   for (const t of TABLES) {
