@@ -328,3 +328,63 @@ p { line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) {
   .cutaway *, .patient *, .btn-act-now, .pip.now { animation: none !important; }
 }
+
+/* ---------- Protocol (hospital sheet style) ---------- */
+.protocol { background: #fff; color: #111; }
+.protocol-kicker { text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; font-weight: 700; color: var(--muted); }
+.protocol-view { font-family: Calibri, 'Inter', system-ui, sans-serif; color: #111; }
+.ptitle { font-size: 1.35rem; text-decoration: underline; text-underline-offset: 4px; margin: 0.2rem 0 0.6rem; color: #111; }
+.pintro { font-style: italic; margin: 0.15rem 0; }
+.pblock { margin: 1rem 0; border: 1.5px solid #555; break-inside: avoid; }
+.pblock.yours { outline: 3px solid var(--gold); outline-offset: 3px; }
+.pblock-title { background: var(--pc); color: #fff; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; padding: 0.3rem 0.6rem; font-size: 1.05rem; display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.pblock-title em { font-style: normal; text-transform: none; font-weight: 600; font-size: 0.85rem; margin-left: auto; }
+.pblock .yours-tag { margin-left: 0; }
+.ptable { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.ptable td, .ptable th { border: 1px solid #777; padding: 0.25rem 0.45rem; text-align: center; vertical-align: middle; }
+.ptable .pbanner { background: var(--pt); }
+.ptable .pbanner.em { font-style: italic; font-weight: 700; background: #fff; }
+.ptable .phead th { background: var(--pt); font-weight: 700; filter: brightness(0.93); }
+.ptable .pfirst { white-space: nowrap; }
+.pcols-cell { padding: 0 !important; }
+.pcols { display: grid; text-align: left; }
+.pcol { border-right: 1px solid #777; padding: 0 0 0.3rem; }
+.pcol:last-child { border-right: none; }
+.pcol-head { background: var(--pt); text-align: center; font-weight: 700; padding: 0.25rem; border-bottom: 1px solid #777; }
+.pcol-lead { text-align: center; padding: 0.25rem 0.4rem 0; }
+.pcol ul { margin: 0.25rem 0 0; padding-left: 1.4rem; line-height: 1.35; }
+.pnotes { margin: 0; padding: 0.4rem 0.6rem 0.5rem 1.6rem; line-height: 1.45; font-size: 0.92rem; background: var(--pt); }
+@media (max-width: 560px) {
+  .pcols { grid-template-columns: 1fr !important; }
+  .pcol { border-right: none; border-bottom: 1px solid #777; }
+  .ptable { font-size: 0.85rem; }
+}
+.sheet .protocol-view { font-size: 9pt; }
+.sheet .pblock { margin: 0.45rem 0; }
+.sheet .ptable { font-size: 8.6pt; }
+.sheet .ptitle { font-size: 14pt; }
+.order-note { display: block; font-size: 0.78rem; color: #9fb1a9; font-weight: 400; margin-top: 0.2rem; }
+.order.insulin { display: grid; gap: 0.5rem; }
+.insulin-now strong { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; color: var(--monitor-lab); }
+.insulin-now em { font-style: normal; color: #9fb1a9; margin-left: 0.5rem; }
+.insulin-row { display: flex; align-items: center; gap: 0.5rem; }
+.insulin-row input { font: inherit; font-size: 1.2rem; width: 110px; padding: 0.45rem; border-radius: 8px; background: #0d1412; color: var(--monitor-ink); border: 1px solid #33443d; }
+.unit-label { color: #9fb1a9; }
+.insulin-btns { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.insulin-btns .btn { padding: 0.45rem 0.7rem; font-size: 0.9rem; }
+.doc-protocol { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; }
+.sheet.protocol-sheet { min-height: auto; }
+
+/* Countdown */
+.countdown { font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 8px; background: rgba(255,255,255,0.12); display: inline-block; }
+.countdown.soon { background: #b45309; color: #fff; animation: act-now 1s ease-in-out infinite; }
+.countdown.paused { background: #475569; color: #fff; }
+.table-screen .countdown { margin-top: 0.3rem; font-size: 1rem; }
+.screen .countdown { font-size: clamp(1.2rem, 2.2vw, 1.8rem); margin-top: 0.3rem; background: rgba(255,255,255,0.15); }
+.timing { display: grid; gap: 0.4rem; }
+.clock-ctl { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+.modal-back { z-index: 50; }
+.ready-bar { z-index: 5; }
+/* A new or changed IV bag slides onto the pole once. */
+.iv-bag-in { animation: iv-bag-in 0.9s cubic-bezier(.2,.8,.3,1) 1; }
+@keyframes iv-bag-in { from { transform: translateY(-60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

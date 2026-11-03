@@ -1,5 +1,7 @@
 // Build what each table is allowed to see. Live values update every beat;
 // lab values carry the hour they were drawn so tables can tell when they are stale.
+import { bagName } from '../ui/orderSpec.js';
+
 const r1 = (v) => Math.round(v * 10) / 10;
 
 export function ecgPattern(k) {
@@ -20,9 +22,19 @@ export function buildAnimations(game) {
   return {
     cardio: { hr: Math.round(p.hr), map: Math.round(p.map), ecg: ecgPattern(p.k), fluidRate: o.fluidRate || 0, fluidType: o.fluidType || 'NS' },
     resp: { rr: p.rr, kussmaul: p.ph < 7.25 && !p.intubated, crackles: p.lungs !== 'Clear', spo2: p.spo2, ventilated: Boolean(p.intubated) },
-    renal: { uo: Math.round(p.uo), k: L.bmp.k, shifting: (o.insulinRate || 0) > 0, kclIn: (o.kclPerL || 0) > 0 || Boolean(o.kRider) },
-    metabolic: { glucose: L.poc.value, insulin: o.insulinRate || 0, dextrose: o.dextrose || 0, bhb: L.bhb.value },
+    renal: { uo: Math.round(p.uo), k: L.bmp.k, shifting: (o.insulinUnits || 0) > 0, kclIn: (o.kclPerL || 0) > 0 || (p.kBolusLeft || 0) > 0 },
+    metabolic: { glucose: L.poc.value, insulin: (o.insulinUnits || 0) / 70, dextrose: o.dextrose || 0, bhb: L.bhb.value },
     neuro: { gcs: p.gcs, pressure: p.edemaRisk >= 3 ? 2 : p.edemaRisk >= 2 ? 1 : 0, sweaty: p.glucose < 70, headache: p.headache !== 'None' },
+    // What is hanging on the IV pole (projector).
+    iv: {
+      nacl: o.fluidType === 'HALF' ? '0.45% NaCl' : '0.9% NaCl',
+      dextrose: Boolean(o.dextrose),
+      kcl: o.kclPerL || 0,
+      rate: o.fluidRate || 0,
+      insulin: o.insulinUnits || 0,
+      kBolus: (p.kBolusLeft || 0) > 0,
+      basal: p.basalHour != null,
+    },
   };
 }
 
@@ -44,7 +56,9 @@ export function buildMonitors(game) {
   const lab = (label, value, unit, drawn) => ({ label, value, unit, drawn, kind: 'lab' });
   const live = (label, value, unit, tone) => ({ label, value, unit, kind: 'live', tone: tone || null });
 
+  const o = game.orders || {};
   const cardio = [
+    live('IV running', `${bagName(o)} at ${o.fluidRate || 0} mL/hr`, ''),
     live('Heart rate', Math.round(p.hr), 'bpm', p.hr > 110 ? 'warn' : null),
     live('Blood pressure', `${p.sbp}/${p.dbp}`, 'mmHg'),
     live('MAP', Math.round(p.map), 'mmHg', p.map < 65 ? 'warn' : null),
@@ -79,6 +93,7 @@ export function buildMonitors(game) {
   const metabolic = [
     live('POC glucose', L.poc.value, 'mg/dL', L.poc.value < 70 || L.poc.value > 250 ? 'warn' : null),
     live('Last hour', L.pocPrev ? L.pocPrev.value : '—', 'mg/dL'),
+    live('Change this hour', L.pocPrev ? `${L.poc.value - L.pocPrev.value > 0 ? '+' : ''}${L.poc.value - L.pocPrev.value}` : '—', 'mg/dL'),
     lab('Beta-hydroxybutyrate', L.bhb.value, 'mmol/L', L.bhb.hour),
     lab('HCO₃⁻ (BMP)', L.bmp.hco3, 'mEq/L', L.bmp.hour),
     lab('Anion gap', L.bmp.ag, '', L.bmp.hour),

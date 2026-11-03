@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { TABLES, SCENES } from '../engine/game.js';
-import { PROTOCOL_TITLE, PROTOCOL_INTRO, PROTOCOL_SECTIONS, PROTOCOL_SOURCE } from '../content/protocol.js';
+import { PROTOCOL_BLOCKS, PROTOCOL_SOURCE } from '../content/protocol.js';
+import ProtocolView from '../components/ProtocolView.jsx';
 import { TABLE_INFO, JOBS, EXIT_TICKET, KEY_TERMS, SCENE_KEYS } from '../content/guide.js';
 
 const OPTIONS = [
   ['roles', 'Role cards (one page per table)'],
-  ['protocol', 'DKA protocol (one copy per table)'],
+  ['protocol', 'DKA/HHS protocol (one copy per table)'],
   ['sbar', 'SBAR call card'],
   ['terms', 'Key terms sheet'],
   ['exit', 'Exit ticket'],
@@ -68,7 +69,6 @@ function Sheet({ children, title, kicker, color, className = '' }) {
 
 function RoleCard({ table }) {
   const info = TABLE_INFO[table.id];
-  const sections = PROTOCOL_SECTIONS.filter((s) => info.protocol.includes(s.id));
   return (
     <>
       <Sheet title={`${table.name} Table`} kicker="Role card · front" color={table.color}>
@@ -92,14 +92,8 @@ function RoleCard({ table }) {
           {JOBS.map(([j, d]) => <tr key={j}><td><strong>{j}</strong></td><td>{d}</td><td className="blank">Name:</td></tr>)}
         </tbody></table>
       </Sheet>
-      <Sheet title={`${table.name}: Your Protocol Sections`} kicker="Role card · back" color={table.color}>
-        <p className="sheet-lead">These are the standing orders your table acts on. The full protocol is on the DKA protocol button on your screen.</p>
-        {sections.map((s) => (
-          <div key={s.id} className="sheet-protocol big">
-            <strong>{s.title}</strong>
-            <ul>{s.items.map((i) => <li key={i}>{i}</li>)}</ul>
-          </div>
-        ))}
+      <Sheet title={`${table.name}: Your Protocol Sections`} kicker="Role card · back" color={table.color} className="compact">
+        <ProtocolView tableId={table.id} ids={info.protocol} notes={false} />
       </Sheet>
     </>
   );
@@ -107,18 +101,10 @@ function RoleCard({ table }) {
 
 function ProtocolSheet() {
   return (
-    <Sheet title={PROTOCOL_TITLE} kicker="Standing orders" className="compact">
-      <p className="sheet-lead">{PROTOCOL_INTRO}</p>
-      <div className="sheet-two">
-        {PROTOCOL_SECTIONS.map((s) => (
-          <div key={s.id} className="sheet-protocol">
-            <strong>{s.title}</strong>
-            <ul>{s.items.map((i) => <li key={i}>{i}</li>)}</ul>
-          </div>
-        ))}
-      </div>
+    <section className="sheet compact protocol-sheet">
+      <ProtocolView />
       <p className="sheet-fine">{PROTOCOL_SOURCE}</p>
-    </Sheet>
+    </section>
   );
 }
 

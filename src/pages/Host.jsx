@@ -1,10 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { get } from 'firebase/database';
 import { ensureSignedIn } from '../firebase.js';
-import { createRoom, publish, listen, roomRef, update } from '../room.js';
+import { createRoom, publish, listen, roomRef, update, serverNow, watchServerOffset } from '../room.js';
+import Countdown from '../components/Countdown.jsx';
 import { newGame, runBeat, startScene, finishScene, mergeOrders, ordersForTable, TABLES, SCENES } from '../engine/game.js';
 import { isResolved, ONE_TIME_ORDERS } from '../engine/model.js';
-import { ORDER_LABELS } from '../ui/orderSpec.js';
+import { ORDER_LABELS, bagName } from '../ui/orderSpec.js';
 import Debrief from './Debrief.jsx';
 import ProtocolPanel from '../components/ProtocolPanel.jsx';
 
@@ -21,6 +22,36 @@ export default function Host() {
   const [error, setError] = useState('');
   const [checklist, setChecklist] = useState({});
   const [showProtocol, setShowProtocol] = useState(false);
+  const [sceneMin, setSceneMin] = useState(5);
+  const gameRef = useRef(null);
+  const tablesRef = useRef({});
+  const runningRef = useRef(false);
+  gameRef.current = game;
+  tablesRef.current = tables;
+
+  useEffect(() => watchServerOffset(), []);
+
+  // The hour clock: each hour gets (scene length / hours in the scene). It runs the hour when
+  // time is up or when every joined table is ready, and holds while a provider call is pending.
+  useEffect(() => {
+    if (!code) return;
+    const t = setInterval(() => {
+      const g = gameRef.current;
+      if (!g || g.status !== 'ordering' || runningRef.current) return;
+      const tb = tablesRef.current || {};
+      const joined = TABLES.filter((x) => tb[x.id]?.joinedAt);
+      const allReady = joined.length > 0 && joined.every((x) => tb[x.id]?.ready);
+      const pending = TABLES.some((x) => Object.values(tb[x.id]?.requests || {}).some((r) => r.status === 'pending'));
+      const c = g.clock;
+      const timeUp = c && !c.paused && serverNow() >= c.deadline;
+      if (pending) {
+        if (timeUp && c && !c.hold) save({ ...g, clock: { ...c, hold: true } });
+        return;
+      }
+      if ((allReady && c) || timeUp) doRunBeat();
+    }, 500);
+    return () => clearInterval(t);
+  }, [code]);
 
   // Sign in, then resume this browser's room if it still exists.
   useEffect(() => {
@@ -45,11 +76,22 @@ export default function Host() {
     return listen(code, 'tables', (v) => setTables(v || {}));
   }, [code]);
 
+  function hourMs(g) {
+    const min = g.timing?.sceneMin || 0;
+    return min ? Math.round((min * 60000) / SCENES[g.sceneIdx].beats) : 0;
+  }
+  // Start this hour's clock when the game is waiting for orders.
+  function withClock(g) {
+    const ms = hourMs(g);
+    if (g.status !== 'ordering' || !ms) return { ...g, clock: null };
+    return { ...g, clock: { deadline: serverNow() + ms, paused: false, remaining: ms, hold: false } };
+  }
+
   async function create() {
     setBusy(true);
     setError('');
     try {
-      const g = newGame(variant);
+      const g = withClock({ ...newGame(variant), timing: { sceneMin } });
       const c = await createRoom(uid, g);
       try { localStorage.setItem(STORE_KEY, c); } catch {}
       setGame(g);
@@ -66,6 +108,10 @@ export default function Host() {
   }
 
   async function doRunBeat() {
+    if (runningRef.current) return;
+    runningRef.current = true;
+    const game = gameRef.current;
+    const tables = tablesRef.current;
     setBusy(true);
     const tableOrders = {};
     const approvals = {};
@@ -83,15 +129,36 @@ export default function Host() {
       tableOrders[t.id] = o;
     }
     const merged = mergeOrders(game.orders, tableOrders, approvals);
-    const g2 = runBeat(game, merged);
+    const g2 = withClock(runBeat(game, merged));
     for (const t of TABLES) {
       for (const k of ONE_TIME_ORDERS) {
         if (tableOrders[t.id][k] !== undefined) extra[`tables/${t.id}/orders/${k}`] = false;
       }
     }
-    await save(g2);
-    await update(roomRef(code), extra);
-    setBusy(false);
+    try {
+      await save(g2);
+      await update(roomRef(code), extra);
+    } finally {
+      setBusy(false);
+      runningRef.current = false;
+    }
+  }
+
+  async function pauseClock() {
+    const g = gameRef.current;
+    if (!g?.clock || g.clock.paused) return;
+    await save({ ...g, clock: { ...g.clock, paused: true, remaining: Math.max(0, g.clock.deadline - serverNow()) } });
+  }
+  async function resumeClock() {
+    const g = gameRef.current;
+    if (!g?.clock || !g.clock.paused) return;
+    await save({ ...g, clock: { ...g.clock, paused: false, hold: false, deadline: serverNow() + Math.max(5000, g.clock.remaining || 0) } });
+  }
+  async function addTime() {
+    const g = gameRef.current;
+    if (!g?.clock) return;
+    const c = g.clock;
+    await save({ ...g, clock: c.paused ? { ...c, remaining: (c.remaining || 0) + 30000 } : { ...c, hold: false, deadline: Math.max(c.deadline, serverNow()) + 30000 } });
   }
 
   async function decide(tableId, key, status) {
@@ -99,20 +166,20 @@ export default function Host() {
   }
 
   async function endScene() {
-    await save(finishScene(game));
+    await save({ ...finishScene(game), clock: null });
   }
 
   async function nextScene() {
     setChecklist({});
-    await save(startScene(game, game.sceneIdx + 1), { resetTables: true });
+    await save(withClock(startScene(game, game.sceneIdx + 1)), { resetTables: true });
   }
 
   async function restartScene() {
-    await save(startScene(game, game.sceneIdx), { resetTables: true });
+    await save(withClock(startScene(game, game.sceneIdx)), { resetTables: true });
   }
 
   async function toDebrief() {
-    await save({ ...game, status: 'debrief' });
+    await save({ ...game, status: 'debrief', clock: null });
   }
 
   function leave() {
@@ -133,6 +200,12 @@ export default function Host() {
             <legend>Arrival potassium</legend>
             <label><input type="radio" checked={variant === 'A'} onChange={() => setVariant('A')} /> Version A: K⁺ 5.6 (high on arrival; the drop comes later)</label>
             <label><input type="radio" checked={variant === 'B'} onChange={() => setVariant('B')} /> Version B: K⁺ 3.2 (insulin must wait)</label>
+          </fieldset>
+          <fieldset className="variant timing">
+            <legend>Pace</legend>
+            <label><input type="radio" checked={sceneMin === 5} onChange={() => setSceneMin(5)} /> 5 minutes per scene (about 75–100 seconds an hour)</label>
+            <label><input type="radio" checked={sceneMin === 8} onChange={() => setSceneMin(8)} /> 8 minutes per scene (about 2–2½ minutes an hour)</label>
+            <label><input type="radio" checked={sceneMin === 0} onChange={() => setSceneMin(0)} /> Untimed: I click Run hour</label>
           </fieldset>
           <button className="btn btn-primary btn-lg" disabled={busy} onClick={create}>Create room</button>
           {error && <p className="error">{error}</p>}
@@ -172,6 +245,7 @@ export default function Host() {
         <div className="host-scene">
           <div className="hs-title">{scene.title}</div>
           <div className="hs-sub">Hour {p.hour} · Beat {game.beat} of {scene.beats}</div>
+          {game.status === 'ordering' && <Countdown clock={game.clock} label="Hour runs in" />}
         </div>
         <div className="host-actions">
           <button
@@ -220,9 +294,19 @@ export default function Host() {
 
           <div className="run-row">
             {game.status === 'ordering' && (
-              <button className="btn btn-primary btn-lg" disabled={busy} onClick={doRunBeat}>
-                {readyCount < 5 ? `Run hour ${p.hour + 1} (${5 - readyCount} not ready)` : `Run hour ${p.hour + 1}`}
-              </button>
+              <>
+                <button className="btn btn-primary btn-lg" disabled={busy} onClick={doRunBeat}>
+                  {game.clock ? `Run hour ${p.hour + 1} now` : readyCount < 5 ? `Run hour ${p.hour + 1} (${5 - readyCount} not ready)` : `Run hour ${p.hour + 1}`}
+                </button>
+                {game.clock && (
+                  <div className="clock-ctl">
+                    {game.clock.paused
+                      ? <button className="btn btn-ghost" onClick={resumeClock}>Resume clock</button>
+                      : <button className="btn btn-ghost" onClick={pauseClock}>Pause clock</button>}
+                    <button className="btn btn-ghost" onClick={addTime}>+30 seconds</button>
+                  </div>
+                )}
+              </>
             )}
             {game.status === 'sceneEnd' && (
               <button className="btn btn-primary btn-lg" onClick={endScene}>End {scene.title.split(':')[0]}</button>
@@ -303,7 +387,7 @@ function TruthPanel({ game, tables, checklist, setChecklist, onRestart, onLeave 
         ))}
       </div>
       <p><strong>DKA resolved:</strong> {isResolved(p) ? `Yes${game.resolvedAtHour != null ? ` (hour ${game.resolvedAtHour})` : ''}` : 'No'}</p>
-      <p><strong>Running:</strong> {o.fluidType} {o.fluidRate} mL/hr{o.dextrose ? ` + D${o.dextrose}` : ''}{o.kclPerL ? ` + KCl ${o.kclPerL} mEq/L` : ''}{o.kRider ? ', K rider' : ''}; insulin {o.insulinRate} units/kg/hr</p>
+      <p><strong>Running:</strong> {bagName(o)} at {o.fluidRate} mL/hr; insulin {o.insulinUnits || 0} units/hr ({((o.insulinUnits || 0) / 70).toFixed(3)} units/kg/hr){p.kBolusLeft ? `; K⁺ bolus running (${p.kBolusLeft} h left)` : ''}</p>
       <p><strong>Score this scene:</strong> class {classScore} · protocol-only {botScore}</p>
       {scene.teachingChecklist && (
         <div className="checklist">

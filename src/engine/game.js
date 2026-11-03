@@ -14,8 +14,8 @@ export const TABLES = [
 // Which table controls which order keys.
 export const OWNERSHIP = {
   cardio: ['fluidType', 'fluidRate'],
-  renal: ['kclPerL', 'kRider', 'phosRepl', 'bmpNow'],
-  metabolic: ['insulinRate', 'dextrose', 'basal', 'bicarb', 'bhbNow'],
+  renal: ['kclPerL', 'kBolus', 'phosRepl', 'bmpNow'],
+  metabolic: ['insulinUnits', 'insulinBolus', 'dextrose', 'd50', 'basal', 'bicarb', 'bhbNow'],
   resp: ['gasNow', 'o2', 'intubate'],
   neuro: ['neuroChecks', 'hob', 'mannitol'],
 };
@@ -79,7 +79,7 @@ export function startScene(game, sceneIdx) {
 
 function clearOneTime(o) {
   const out = { ...o };
-  for (const k of ONE_TIME_ORDERS) out[k] = false;
+  for (const k of ONE_TIME_ORDERS) out[k] = typeof out[k] === 'number' ? 0 : false;
   return out;
 }
 

@@ -44,14 +44,15 @@ export function updateClassLabs(labs, p, o) {
   return next;
 }
 
-// Protocol-only schedule: K/BMP at baseline, 2 h, then every 4 h; POC every 2 h; BHB every 4 h.
+// Protocol-only schedule (the protocol's monitoring parameters): POC glucose hourly,
+// potassium/BMP every 2 hours, BHB and gas every 4 hours. Never a stat draw.
 export function updateBotLabs(labs, p, startHour) {
-  const h = p.hour;
-  const since = h - startHour;
-  const next = { ...labs };
-  if (h % 2 === 0) next.poc = drawPoc(p);
-  if (since === 2 || (since > 2 && (since - 2) % 4 === 0)) next.bmp = drawBmp(p);
-  if (since % 4 === 0) next.bhb = drawBhb(p);
-  if (since % 4 === 0) next.gas = drawGas(p);
+  const since = p.hour - startHour;
+  const next = { ...labs, pocPrev: labs.poc, poc: drawPoc(p) };
+  if (since % 2 === 0) next.bmp = drawBmp(p);
+  if (since % 4 === 0) {
+    next.bhb = drawBhb(p);
+    next.gas = drawGas(p);
+  }
   return next;
 }

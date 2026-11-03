@@ -18,21 +18,27 @@ export function osmFrom(na, glucose, bun) {
   return 2 * na + glucose / 18 + bun / 2.8;
 }
 
+// Hillier (1999), as in the protocol: measured Na + 0.024 x (glucose - 100).
 export function correctedNa(na, glucose) {
-  return na + (1.6 * (glucose - 100)) / 100;
+  return na + 0.024 * (glucose - 100);
 }
+
+// Insulin in units/hr for a 70 kg patient. 7 units/hr = 0.1 units/kg/hr.
+export const unitsToPerKg = (u) => (u || 0) / WEIGHT_KG;
 
 export const DEFAULT_ORDERS = {
   // Cardiovascular
-  fluidType: 'NS', // 'LR' | 'NS' | 'HALF'
-  fluidRate: 250, // mL/hr: 0, 125, 250, 500, 1000
+  fluidType: 'NS', // 'NS' (0.9% NaCl) | 'HALF' (0.45% NaCl)
+  fluidRate: 250, // mL/hr: 0, 150, 250, 500, 1000 (1000 = bolus)
   // Renal & Fluids
-  kclPerL: 0, // mEq/L added to the running fluids: 0, 20, 30, 40
-  kRider: false, // KCl 10 mEq/hr IV rider
-  phosRepl: false, // one-time
+  kclPerL: 0, // mEq/L of K+ added to the running fluid: 0, 20, 40
+  kBolus: false, // one-time: 40 mEq K+ bolus, runs 10 mEq/hr for 4 hours
+  phosRepl: false, // one-time, provider approval required
   // Metabolic
-  insulinRate: 0, // units/kg/hr: 0, 0.05, 0.1, 0.14
-  dextrose: 0, // % added to fluids: 0, 5, 10
+  insulinUnits: 0, // regular insulin infusion, units/hr (0 to 20)
+  insulinBolus: false, // one-time 0.1 units/kg (7 units), provider approval required
+  dextrose: 0, // 0 or 5: dextrose 5% added to the running NaCl
+  d50: 0, // one-time D50W in grams: 0, 12.5, 25
   basal: false, // one-time: subcutaneous basal insulin
   bicarb: false, // one-time, provider approval required
   // Respiratory
@@ -48,8 +54,8 @@ export const DEFAULT_ORDERS = {
   bhbNow: false, // one-time stat beta-hydroxybutyrate
 };
 
-export const ONE_TIME_ORDERS = ['phosRepl', 'basal', 'bicarb', 'gasNow', 'intubate', 'mannitol', 'bmpNow', 'bhbNow'];
-export const APPROVAL_ORDERS = ['bicarb', 'intubate', 'mannitol'];
+export const ONE_TIME_ORDERS = ['kBolus', 'phosRepl', 'insulinBolus', 'd50', 'basal', 'bicarb', 'gasNow', 'intubate', 'mannitol', 'bmpNow', 'bhbNow'];
+export const APPROVAL_ORDERS = ['insulinBolus', 'phosRepl', 'bicarb', 'intubate', 'mannitol'];
 
 export function ecgFor(k, hr) {
   const rhythm = hr > 100 ? 'Sinus tachycardia' : 'Normal sinus rhythm';
@@ -86,6 +92,7 @@ export function makePatient(p) {
     basalHour: p.basalHour ?? null,
     dripWasOn: p.dripWasOn ?? false,
     dripOnLast: p.dripWasOn ?? false,
+    kBolusLeft: 0,
     totalIn: p.totalIn ?? 0,
     totalOut: p.totalOut ?? 0,
     safetyEvents: [],
@@ -136,12 +143,14 @@ export function step(prev, o) {
   const rateL = (o.fluidRate || 0) / 1000;
 
   // ---- insulin ----
-  const dripOn = o.insulinRate > 0;
+  const units = o.insulinUnits ?? (o.insulinRate || 0) * WEIGHT_KG;
+  const dripOn = units > 0;
   // Basal insulin takes 1-2 hours to cover: partial at 1 hour, full at 2.
   const basalAge = s.basalHour == null ? -1 : s.hour - s.basalHour;
   const basalEff = basalAge >= 2 ? 0.45 : basalAge >= 1 ? 0.25 : 0;
   const basalActive = basalEff > 0;
-  const effF = dripOn ? o.insulinRate / 0.1 : basalEff;
+  // effF 1 = 0.1 units/kg/hr (7 units/hr). A 0.1 units/kg bolus adds about an hour of that.
+  const effF = (dripOn ? units / 7 : basalEff) + (o.insulinBolus ? 1 : 0);
   if (dripOn) s.dripWasOn = true;
   s.dripOnLast = dripOn;
   if (o.basal && s.basalHour == null) s.basalHour = prev.hour;
@@ -160,6 +169,7 @@ export function step(prev, o) {
   dG -= 60 * effF * (prev.glucose > 100 ? 1 : 0.5);
   const dexGrams = (o.dextrose || 0) * 10 * rateL;
   dG += dexGrams * 3.6;
+  dG += (Number(o.d50) || 0) * 4; // D50W: 25 g raises glucose about 100 mg/dL
   s.glucose = clamp(prev.glucose + dG, 20, 900);
   s.glucoseDrop = prev.glucose - s.glucose;
 
@@ -171,7 +181,7 @@ export function step(prev, o) {
   // ---- chloride / sodium ----
   const clPerL = o.fluidType === 'NS' ? 2.5 : o.fluidType === 'LR' ? 0.3 : -0.5;
   s.cl = clamp(prev.cl + clPerL * rateL, 85, 122);
-  let dNa = -1.6 * (dG / 100);
+  let dNa = -2.4 * (dG / 100);
   if (o.fluidType === 'HALF') dNa -= 1.2 * rateL;
   if (o.fluidType === 'NS' && prev.na < 145) dNa += 0.4 * rateL;
   s.na = clamp(prev.na + dNa, 115, 165);
@@ -204,7 +214,9 @@ export function step(prev, o) {
   let dK = -0.75 * effF * acidF; // insulin drives K into cells
   dK -= 0.12 * rateL; // dilution
   if (prev.uo > 50) dK -= 0.12; // urinary loss
-  const mEq = (o.kclPerL || 0) * rateL + (o.kRider ? 10 : 0);
+  s.kBolusLeft = o.kBolus ? 4 : Math.max(0, (prev.kBolusLeft || 0) - 1);
+  const bolusRunning = o.kBolus || (prev.kBolusLeft || 0) > 0;
+  const mEq = (o.kclPerL || 0) * rateL + (bolusRunning ? 10 : 0) + (o.kRider ? 10 : 0);
   dK += mEq * 0.028;
   if (o.bicarb) dK -= 0.5;
   if (s.ph < prev.ph - 0.05) dK += 0.3; // worsening acidosis shifts K out
@@ -218,7 +230,7 @@ export function step(prev, o) {
     s.bun = prev.bun + 0.5;
     s.cr = prev.cr + 0.02;
   }
-  let dP = -0.25 * (dripOn ? effF : 0) + (o.phosRepl ? 0.8 : 0) - (prev.uo > 50 ? 0.05 : 0);
+  let dP = -0.25 * (dripOn ? Math.min(effF, 2) : 0) + (o.phosRepl ? 0.8 : 0) - (prev.uo > 50 ? 0.05 : 0);
   s.phos = clamp(prev.phos + dP, 0.3, 6);
 
   // ---- neuro ----
@@ -248,8 +260,8 @@ export function step(prev, o) {
     `QRS widening on the monitor. K⁺ is ${s.k.toFixed(1)}.`);
   if (s.glucose < 45 && prev.glucose >= 45) safety(s, events, 'neuro', 'Hypoglycemic seizure',
     `Jordan has a generalized seizure. POC glucose ${Math.round(s.glucose)} mg/dL.`);
-  else if (s.glucose < 70 && prev.glucose >= 70) safety(s, events, 'neuro', 'Hypoglycemia',
-    `Jordan is sweaty, shaky, and confused. POC glucose ${Math.round(s.glucose)} mg/dL.`);
+  else if (s.glucose < 75 && prev.glucose >= 75) safety(s, events, 'neuro', 'Hypoglycemia',
+    `Jordan is sweaty, shaky, and confused. POC glucose ${Math.round(s.glucose)} mg/dL. Follow the hypoglycemia section of the protocol.`);
   if (s.edemaRisk >= 3 && prev.edemaRisk < 3) safety(s, events, 'neuro', 'Cerebral edema signs',
     'Severe headache, GCS falling, pupils sluggish. Osmolality has dropped too fast for several hours.');
   else if (s.edemaRisk >= 2 && prev.edemaRisk < 2) events.push(card('neuro', 'warn', 'Headache worsening',
@@ -261,7 +273,7 @@ export function step(prev, o) {
   if (s.bicarbParadox === 2) events.push(card('neuro', 'warn', 'Mental status dipped',
     'After the bicarbonate push, Jordan is more confused.'));
   if (mEq > 20) events.push(card('renal', 'warn', 'Potassium infusing too fast',
-    `KCl is running at ${Math.round(mEq)} mEq/hr. Most protocols cap peripheral potassium at 10\u201320 mEq/hr.`));
+    `Potassium is running at ${Math.round(mEq)} mEq/hr. The protocol requires a provider call before potassium runs above 10 mEq/hr with a bolus.`));
   const dripWasRunning = prev.dripOnLast ?? prev.dripWasOn;
   if (dripWasRunning && !dripOn && basalEff < 0.45) {
     events.push(card('metabolic', 'warn', 'Drip off, no basal coverage',
@@ -309,9 +321,9 @@ export function scoreBeat(p, prev) {
   ];
   const drop = prev ? prev.glucose - p.glucose : 0;
   let glu;
-  if (p.glucose < 70) glu = 0;
-  else if (p.glucose >= 150 && p.glucose <= 250) glu = 2;
-  else if (p.glucose > 250 && drop >= 40 && drop <= 110) glu = 2;
+  if (p.glucose < 75) glu = 0;
+  else if (p.glucose >= 150 && p.glucose <= 200) glu = 2; // stage 2 goal
+  else if (p.glucose > 200 && drop >= 45 && drop <= 90) glu = 2; // stage 1: falling about 50-75 an hour
   else glu = 1;
   const bhbDelta = prev ? p.bhb - prev.bhb : 0;
   const ket = p.bhb < 0.6 || bhbDelta < -0.2 ? 2 : bhbDelta <= 0.05 ? 1 : 0;

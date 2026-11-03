@@ -1,11 +1,12 @@
 import React from 'react';
 import { TABLES } from '../engine/game.js';
-import { PROTOCOL_SECTIONS } from '../content/protocol.js';
+import { PROTOCOL_BLOCKS } from '../content/protocol.js';
+import ProtocolView from '../components/ProtocolView.jsx';
 import {
   TABLE_INFO, JOBS, FLOW, SCENE_KEYS, PROVIDER_CALLS, DEBRIEF_KEY, EXIT_TICKET, SIMPLIFICATIONS, KEY_TERMS,
 } from '../content/guide.js';
 
-const sectionTitle = (id) => PROTOCOL_SECTIONS.find((s) => s.id === id)?.title.replace(/^\d+\.\s*/, '');
+const sectionTitle = (id) => PROTOCOL_BLOCKS.find((s) => s.id === id)?.title;
 
 export default function Guide() {
   return (
@@ -18,7 +19,8 @@ export default function Guide() {
 
       <h1>DKA: One Patient, Five Tables. Teacher Guide</h1>
       <p className="doc-lead">
-        Adult severe DKA, three scenes, about 60 minutes. For NUR 4206 (Advanced Med-Surg/ICU) or pharmacology.
+        Adult severe DKA, three 5-minute scenes plus a debrief, about 30–35 minutes. Runs on the hospital DKA/HHS
+        Treatment Protocol. For NUR 4206 (Advanced Med-Surg/ICU) or pharmacology.
       </p>
 
       <h2>What this is</h2>
@@ -49,6 +51,7 @@ export default function Guide() {
         <li>Print the role cards, the protocol, and the exit tickets from <a href="#/print">Print student materials</a>.</li>
         <li>Open the instructor dashboard, choose <strong>Version A</strong> (K⁺ 5.6, first run) or <strong>Version B</strong> (K⁺ 3.2, insulin must wait), and create a room.</li>
         <li>Click <strong>Open projector view</strong>, move that window to the classroom screen, and click Full screen. Keep the dashboard and its instructor panel off the projector.</li>
+        <li>Choose the hour length before you start: <strong>5 minutes per scene</strong> (default), 8 minutes, or untimed. When the timer runs out, or every joined table taps Ready, the hour runs by itself.</li>
         <li>Classes of 12–14: run four tables and have the Respiratory table also cover Neuro.</li>
       </ul>
 
@@ -86,8 +89,9 @@ export default function Guide() {
       </table>
       <p>
         <strong>Each hour:</strong> tables read their monitors, Callers gather numbers, the table agrees on orders, and
-        the Dialer taps Ready. When all five tiles are filled in on the projector, click <strong>Run hour</strong>. You
-        can run an hour before every table is ready; late tables keep their last orders.
+        the Dialer taps Ready. The hour runs when the countdown ends or when every joined table is ready, whichever
+        comes first. Tables that miss the countdown keep their last orders. You can pause the clock or run the hour early
+        from the dashboard.
       </p>
 
       <h2>Scene-by-scene facilitation and answer key</h2>
@@ -104,6 +108,10 @@ export default function Guide() {
           <p className="doc-trap"><strong>Traps:</strong> {s.traps}</p>
         </section>
       ))}
+
+      <h2>The protocol</h2>
+      <p>Every table can open this from the <strong>DKA protocol</strong> button. Print copies from Print student materials.</p>
+      <div className="doc-protocol"><ProtocolView /></div>
 
       <h2>Answering provider calls</h2>
       <table className="doc-table">

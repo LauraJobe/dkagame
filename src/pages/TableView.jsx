@@ -6,6 +6,7 @@ import { TABLES } from '../engine/game.js';
 import { ORDER_SPEC } from '../ui/orderSpec.js';
 import ProtocolPanel from '../components/ProtocolPanel.jsx';
 import Cutaway from '../components/Cutaway.jsx';
+import Countdown from '../components/Countdown.jsx';
 
 export default function TableView({ code, tableId }) {
   const table = TABLES.find((t) => t.id === tableId);
@@ -80,6 +81,7 @@ export default function TableView({ code, tableId }) {
         <div className="clock">
           <div className="clock-hour">Hour {hour}</div>
           <div className="clock-scene">{meta?.sceneTitle || 'Waiting for instructor'}</div>
+          {meta?.status === 'ordering' && <Countdown clock={meta.clock} />}
         </div>
       </header>
 
@@ -162,14 +164,52 @@ export default function TableView({ code, tableId }) {
   );
 }
 
+function InsulinControl({ value, disabled, onChange }) {
+  const u = Number(value) || 0;
+  const [draft, setDraft] = useState(String(u));
+  useEffect(() => setDraft(String(u)), [u]);
+  const set = (v) => onChange(Math.max(0, Math.min(20, Math.round(v * 10) / 10)));
+  const perKg = (u / 70).toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+  return (
+    <div className="order insulin">
+      <span>Regular insulin infusion</span>
+      <div className="insulin-now">
+        <strong>{u ? `${u} units/hr` : 'Off'}</strong>
+        {u > 0 && <em>= {perKg} units/kg/hr</em>}
+      </div>
+      <div className="insulin-row">
+        <input
+          type="number" min="0" max="20" step="0.1" inputMode="decimal" aria-label="Insulin units per hour"
+          disabled={disabled} value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onBlur={() => set(Number(draft) || 0)}
+          onKeyDown={(e) => { if (e.key === 'Enter') set(Number(draft) || 0); }}
+        />
+        <span className="unit-label">units/hr</span>
+      </div>
+      <div className="insulin-btns">
+        <button className="btn btn-ghost" disabled={disabled} onClick={() => set(3.5)}>Start 3.5</button>
+        <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(u * 2)}>Double</button>
+        <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(u / 2)}>Halve</button>
+        <button className="btn btn-ghost" disabled={disabled} onClick={() => set(1.4)}>Stage 2: 1.4</button>
+        <button className="btn btn-ghost" disabled={disabled} onClick={() => set(u + 0.7)}>+0.7</button>
+        <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(u - 0.7)}>−0.7</button>
+        <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(0)}>Stop</button>
+      </div>
+      <p className="order-note">Stage 1: change under 50 or rising, double (max 20). Down 50–75, keep. Down over 75, halve. 0.01 units/kg/hr = 0.7 units/hr.</p>
+    </div>
+  );
+}
+
 function OrderControl({ spec, value, request, disabled, onChange, onRequest }) {
+  if (spec.kind === 'insulin') return <InsulinControl value={value} disabled={disabled} onChange={onChange} />;
   if (spec.kind === 'select') {
     return (
       <label className="order">
-        <span>{spec.label}</span>
+        <span>{spec.label}{spec.note && <small className="order-note">{spec.note}</small>}</span>
         <select
           disabled={disabled}
-          value={value ?? ''}
+          value={String(value === false || value == null ? spec.options[0].value : value)}
           onChange={(e) => {
             const raw = e.target.value;
             const opt = spec.options.find((o) => String(o.value) === raw);

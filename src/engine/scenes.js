@@ -1,7 +1,7 @@
 import { DEFAULT_ORDERS } from './model.js';
 
 // Each scene starts from a fixed preset so scenes stand alone and the
-// protocol-only patient can be compared beat for beat.
+// protocol-only patient can be compared hour for hour.
 export const SCENES = [
   {
     id: 'arrival',
@@ -9,9 +9,9 @@ export const SCENES = [
     hours: 'Hours 0–3',
     beats: 3,
     report:
-      'Jordan Reyes, 22, type 1 diabetes since age 12. Flu for 3 days, stopped eating, skipped insulin. ' +
-      'The ED gave 1 liter of 0.9% NaCl; it is running at 250 mL/hr through one of two 20 g IVs. No insulin yet. ' +
-      'Admitting labs are on your monitors. You are working under the nurse-driven DKA protocol: tap DKA protocol on your screen to read it.',
+      'Jordan Reyes, 22, type 1 diabetes since age 12. Flu for 3 days, stopped eating, skipped insulin. 70 kg. ' +
+      'The ED drew labs and gave 1 liter of 0.9% NaCl; it is now running at 250 mL/hr. No insulin yet. ' +
+      'Admitting labs are on your monitors. Follow the DKA/HHS protocol: tap DKA protocol on your screen.',
     preset: (variant) => ({
       hour: 0,
       deficitL: 4.0,
@@ -30,12 +30,11 @@ export const SCENES = [
     }),
     orders: { ...DEFAULT_ORDERS, fluidType: 'NS', fluidRate: 250 },
     cards: {
-      // shown after the given beat has run (beat numbers start at 1)
       2: (p) => ({
         table: 'renal',
         severity: 'info',
         title: '2-hour potassium',
-        text: `Lab calls with the 2-hour potassium: ${p.k.toFixed(1)} mEq/L.`,
+        text: `Lab calls with the 2-hour potassium: ${p.k.toFixed(1)} mEq/L. Check the IV fluids table for the right potassium.`,
       }),
     },
   },
@@ -45,8 +44,8 @@ export const SCENES = [
     hours: 'Hours 4–8',
     beats: 4,
     report:
-      'Hour 4. The insulin drip is running at 0.1 units/kg/hr (7 units/hr). LR at 250 mL/hr with 20 mEq/L KCl. ' +
-      'Jordan is less drowsy. The numbers are moving in the right direction.',
+      'Hour 4. Insulin was doubled to 7 units/hr an hour ago. 0.45% NaCl with 20 mEq K⁺ is running at 250 mL/hr. ' +
+      'Jordan is less drowsy. Keep titrating insulin by the hourly glucose change, and watch for two readings under 200.',
     preset: () => ({
       hour: 4,
       deficitL: 1.4,
@@ -55,7 +54,7 @@ export const SCENES = [
       hco3: 12.5,
       paco2: 27,
       k: 4.3,
-      na: 135,
+      na: 138,
       cl: 103,
       bun: 26,
       cr: 1.25,
@@ -64,7 +63,7 @@ export const SCENES = [
       temp: 37.6,
       dripWasOn: true,
     }),
-    orders: { ...DEFAULT_ORDERS, fluidType: 'LR', fluidRate: 250, kclPerL: 20, insulinRate: 0.1 },
+    orders: { ...DEFAULT_ORDERS, fluidType: 'HALF', fluidRate: 250, kclPerL: 20, insulinUnits: 7 },
     cards: {
       3: (p) => ({
         table: 'metabolic',
@@ -81,15 +80,15 @@ export const SCENES = [
     hours: 'Hours 12–16',
     beats: 4,
     report:
-      'Hour 12. Jordan is awake, alert, and asking for breakfast. Insulin drip at 0.05 units/kg/hr (3.5 units/hr) with ' +
-      'D5 LR at 125 mL/hr and 20 mEq/L KCl. Home regimen: glargine 18 units daily plus lispro with meals.',
+      'Hour 12. Jordan is awake, alert, and asking for breakfast. Stage 2: insulin at 0.02 units/kg/hr (1.4 units/hr), ' +
+      'Dextrose 5%–0.45% NaCl with 20 mEq K⁺ at 150 mL/hr. Home regimen: glargine 18 units daily plus lispro with meals.',
     preset: () => ({
       hour: 12,
       deficitL: 0.3,
-      glucose: 190,
-      bhb: 1.0,
-      hco3: 16.5,
-      paco2: 32,
+      glucose: 178,
+      bhb: 0.8,
+      hco3: 17.5,
+      paco2: 33,
       k: 4.1,
       na: 139,
       cl: 106,
@@ -100,7 +99,7 @@ export const SCENES = [
       temp: 37.0,
       dripWasOn: true,
     }),
-    orders: { ...DEFAULT_ORDERS, fluidType: 'LR', fluidRate: 125, kclPerL: 20, insulinRate: 0.05, dextrose: 5 },
+    orders: { ...DEFAULT_ORDERS, fluidType: 'HALF', fluidRate: 150, kclPerL: 20, insulinUnits: 1.4, dextrose: 5 },
     cards: {},
     teachingChecklist: [
       'Never skip basal insulin, even when not eating',
