@@ -40,7 +40,6 @@ export function metaFor(game) {
     beat: game.beat,
     beats: scene.beats,
     hour: game.patient.hour,
-    variant: game.variant,
     cards: game.cards || [],
     status5: tableStatus(game.lastScore && game.beat > 0 ? game.lastScore : null),
   };

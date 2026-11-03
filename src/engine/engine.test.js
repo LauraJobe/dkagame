@@ -6,7 +6,7 @@ const play = (g, list) => list.reduce((acc, o) => runBeat(acc, { ...acc.orders, 
 
 describe('arrival values', () => {
   it('starts in severe DKA with consistent acid-base math', () => {
-    const g = newGame('A');
+    const g = newGame();
     expect(g.patient.ph).toBeCloseTo(7.06, 1);
     expect(Math.round(g.patient.ag)).toBe(27);
     expect(phFrom(24, 40)).toBeCloseTo(7.4, 2);
@@ -17,58 +17,65 @@ describe('arrival values', () => {
 });
 
 describe('scene 1: potassium', () => {
-  it('following the protocol keeps K in range', () => {
-    const g = play(newGame('A'), [
-      { fluidRate: 1000, insulinUnits: 3.5 },
-      { fluidType: 'HALF', fluidRate: 250, kclPerL: 20 },
-      { kclPerL: 20 },
-    ]);
-    expect(g.patient.k).toBeGreaterThanOrEqual(4.0);
-    expect(g.allCards.some((c) => c.severity === 'danger')).toBe(false);
-    expect(g.status).toBe('sceneEnd');
+  it('arrives with K+ that allows insulin, which falls under 3.3 by the 2-hour lab', () => {
+    const g0 = newGame();
+    expect(g0.patient.k).toBeGreaterThanOrEqual(3.3);
+    const g = play(g0, [{ fluidRate: 1000, insulinUnits: 3.5 }, { fluidType: 'HALF', fluidRate: 250, kclPerL: 40 }]);
+    expect(g.labs.bmp.k).toBeLessThan(3.3);
   });
 
-  it('insulin with K under 3.3 causes ventricular tachycardia', () => {
-    const g = play(newGame('B'), [{ fluidRate: 1000, insulinUnits: 3.5 }, {}]);
-    expect(g.allCards.map((c) => c.title)).toContain('Ventricular tachycardia');
-  });
-
-  it('holding insulin and giving the K bolus raises potassium', () => {
-    const g = play(newGame('B'), [{ fluidRate: 1000, kBolus: true }, {}]);
+  it('holding insulin with the K bolus brings potassium back over 3.3', () => {
+    let g = play(newGame(), [{ fluidRate: 1000, insulinUnits: 3.5 }, { fluidType: 'HALF', fluidRate: 250, kclPerL: 40 }]);
+    g = runBeat(g, { ...g.orders, insulinUnits: 0, kBolus: true });
     expect(g.patient.k).toBeGreaterThan(3.3);
+    expect(g.allCards.map((c) => c.title)).not.toContain('Insulin ran with K\u207a under 3.3');
   });
 
-  it('protocol-only patient holds insulin when K is under 3.3', () => {
-    const g = play(newGame('B'), [{ fluidRate: 1000 }]);
-    expect(g.bot.patient.k).toBeGreaterThan(3.2);
+  it('running insulin after a K+ under 3.3 is flagged and costs points', () => {
+    let g = play(newGame(), [{ fluidRate: 1000, insulinUnits: 3.5 }, { fluidType: 'HALF', fluidRate: 250, kclPerL: 40 }]);
+    const held = runBeat(g, { ...g.orders, insulinUnits: 0, kBolus: true });
+    const kept = runBeat(g, { ...g.orders });
+    expect(kept.allCards.map((c) => c.title)).toContain('Insulin ran with K\u207a under 3.3');
+    expect(kept.lastScore.total).toBeLessThan(held.lastScore.total);
+  });
+
+  it('no potassium replacement brings PVCs', () => {
+    const g = play(newGame(), [{ fluidRate: 1000, insulinUnits: 3.5 }, { fluidType: 'HALF', fluidRate: 250 }, {}]);
+    expect(g.patient.k).toBeLessThan(2.8);
   });
 });
 
 describe('scene 2: titration and dextrose', () => {
   it('leaving insulin at 7 units/hr with no dextrose causes hypoglycemia', () => {
-    let g = startScene(newGame('A'), 1);
-    g = play(g, [{}, {}, {}, {}]);
+    let g = startScene(newGame(), 1);
+    g = play(g, [{}, {}, {}]);
     expect(g.allCards.map((c) => c.title)).toContain('Hypoglycemia');
   });
 
-  it('stage 2 with D5 at 150 keeps glucose safe', () => {
-    let g = startScene(newGame('A'), 1);
-    g = play(g, [{ insulinUnits: 3.5 }, {}, { fluidRate: 150, dextrose: 5, insulinUnits: 1.4 }, {}]);
+  it('halving, then Stage 2 with D5 at 150, keeps glucose safe', () => {
+    let g = startScene(newGame(), 1);
+    g = play(g, [{}, { insulinUnits: 3.5 }, { fluidRate: 150, dextrose: 5, insulinUnits: 1.4 }]);
     expect(g.patient.glucose).toBeGreaterThan(120);
     expect(g.allCards.some((c) => c.severity === 'danger')).toBe(false);
   });
 
+  it('the provider order arrives after hour 6', () => {
+    let g = startScene(newGame(), 1);
+    g = play(g, [{}, {}]);
+    expect(g.cards.map((c) => c.title)).toContain('New provider order');
+  });
+
   it('D50 raises glucose', () => {
-    let g = startScene(newGame('A'), 1);
-    g = play(g, [{}, {}, {}]);
+    let g = startScene(newGame(), 1);
+    g = play(g, [{}, {}]);
     const before = g.patient.glucose;
     g = runBeat(g, { ...g.orders, insulinUnits: 0, d50: 25 });
     expect(g.patient.glucose).toBeGreaterThan(before);
   });
 
-  it('stopping the drip early makes ketones rebound', () => {
-    let g = startScene(newGame('A'), 1);
-    g = play(g, [{ insulinUnits: 3.5 }, {}, { fluidRate: 150, dextrose: 5, insulinUnits: 1.4 }]);
+  it('stopping the drip on the provider order makes ketones rebound', () => {
+    let g = startScene(newGame(), 1);
+    g = play(g, [{}, { insulinUnits: 3.5 }]);
     const before = g.patient.bhb;
     g = runBeat(g, { ...g.orders, insulinUnits: 0 });
     expect(g.patient.bhb).toBeGreaterThan(before);
@@ -76,24 +83,32 @@ describe('scene 2: titration and dextrose', () => {
 });
 
 describe('scene 3: transition', () => {
-  it('basal overlap prevents rebound', () => {
-    let g = startScene(newGame('A'), 2);
-    g = play(g, [{}, { basal: true }, {}, { insulinUnits: 0, dextrose: 0 }]);
+  it('resolves by the gap and bicarbonate definition', () => {
+    let g = startScene(newGame(), 2);
+    g = play(g, [{}]);
+    expect(isResolved(g.patient)).toBe(true);
+    expect(g.patient.na - g.patient.cl - g.patient.hco3).toBeLessThan(12);
+    expect(g.patient.hco3).toBeGreaterThan(18);
+  });
+
+  it('basal overlap keeps it resolved', () => {
+    let g = startScene(newGame(), 2);
+    g = play(g, [{}, { basal: true }, { insulinUnits: 0, dextrose: 0 }]);
     expect(isResolved(g.patient)).toBe(true);
   });
 
-  it('no overlap lets DKA rebound', () => {
-    let g = startScene(newGame('A'), 2);
-    g = play(g, [{}, { insulinUnits: 0, dextrose: 0 }, {}, {}]);
+  it('no overlap lets DKA return', () => {
+    let g = startScene(newGame(), 2);
+    g = play(g, [{ insulinUnits: 0, dextrose: 0 }, {}, {}]);
     expect(isResolved(g.patient)).toBe(false);
   });
 
   it('finishScene stores histories for the debrief', () => {
-    let g = startScene(newGame('A'), 2);
-    g = play(g, [{}, {}, {}, {}]);
+    let g = startScene(newGame(), 2);
+    g = play(g, [{}, {}, {}]);
     g = finishScene(g);
-    expect(g.results[0].history.length).toBe(5);
-    expect(g.results[0].botHistory.length).toBe(5);
+    expect(g.results[0].history.length).toBe(4);
+    expect(g.results[0].botHistory.length).toBe(4);
   });
 });
 
@@ -110,7 +125,7 @@ describe('orders', () => {
   });
 
   it('intubation crashes the pH', () => {
-    let g = newGame('A');
+    let g = newGame();
     g = runBeat(g, { ...g.orders, fluidRate: 1000, insulinUnits: 3.5, intubate: true });
     expect(g.patient.ph).toBeLessThan(7.0);
   });

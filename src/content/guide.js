@@ -72,8 +72,8 @@ export const FLOW = [
   ['Set up', '5 min', 'Seat five tables, one device each. Project the projector view. Tables join with the room code and assign jobs.'],
   ['Opening', '3 min', 'Read the shift report aloud. Point every table to the DKA protocol button. Remind them: no table sees everything.'],
   ['Scene 1: Arrival', '8–10 min', 'Hours 0–3. Three hours. Fluids, potassium, then insulin at 0.05 units/kg/hr.'],
-  ['Scene 2: The drip', '10–12 min', 'Hours 4–8. Four hours. Hourly titration, Stage 2 after two readings under 200, and the provider’s stop-the-drip order.'],
-  ['Scene 3: Transition', '8–10 min', 'Hours 12–16. Four hours. Confirm resolution, give basal insulin, overlap, stop the drip, teach sick-day rules.'],
+  ['Scene 2: The drip', '8–10 min', 'Hours 4–7. Three hours. Hourly titration, Stage 2 after two readings under 200, and the provider’s stop-the-drip order.'],
+  ['Scene 3: Transition', '8–10 min', 'Hours 12–15. Three hours. Confirm resolution, give basal insulin, overlap, stop the drip, teach sick-day rules.'],
   ['Debrief', '12 min', 'Project the graphs. Our Jordan against the protocol-only Jordan.'],
   ['Exit ticket', '5 min', 'Three questions on paper (print materials).'],
 ];
@@ -81,33 +81,33 @@ export const FLOW = [
 export const SCENE_KEYS = [
   {
     title: 'Scene 1: Arrival (hours 0\u20133)',
-    goal: 'Finish the NS bolus, check potassium before insulin, start the infusion at 0.05 units/kg/hr, and pick the right bag.',
+    goal: 'Finish the NS bolus, start insulin at 0.05 units/kg/hr (K\u207a 3.8 is over 3.3), replace potassium, and HOLD insulin when K\u207a falls under 3.3.',
     hours: [
-      ['Hour 0 \u2192 1', 'Cardiovascular gives the second liter of 0.9% NaCl as a bolus (1,000 mL/hr), with no potassium in it. Version A: K\u207a 5.6 is over 3.3, so Metabolic starts insulin at 3.5 units/hr (0.05 units/kg/hr); Renal adds no K\u207a (over 5.3). Version B: K\u207a 3.2 is under 3.3, so insulin is HELD and Renal gives the 40 mEq potassium bolus.'],
-      ['Hour 1 \u2192 2', 'Corrected sodium is about 141 (131 + 0.024 \u00d7 412), so the bag changes to 0.45% NaCl at 250 mL/hr. K\u207a falls under 5.3, so Renal adds 20 mEq per liter. Metabolic checks the hourly change: glucose fell about 60, so the rate stays (50\u201375 = continue).'],
-      ['Hour 2 \u2192 3', 'The 2-hour K\u207a comes back near 4.9. Glucose falls under 50 this hour, so Metabolic doubles insulin to 7 units/hr. Version B: the 2-hour K\u207a is about 3.5, so insulin can start now at 3.5 units/hr.'],
+      ['Hour 0 \u2192 1', 'Cardiovascular gives the second liter of 0.9% NaCl as a bolus (1,000 mL/hr), with no potassium in it. K\u207a 3.8 is over 3.3, so Metabolic starts insulin at 3.5 units/hr. K\u207a is under 4.0, so the next bag needs 40 mEq.'],
+      ['Hour 1 \u2192 2', 'Corrected sodium is about 141 (131 + 0.024 \u00d7 412), so the bag becomes 0.45% NaCl w/ 40 mEq K\u207a at 250 mL/hr. Cardiovascular\u2019s ECG already shows flattened T waves: a cue to ask Renal for a stat BMP.'],
+      ['Hour 2 \u2192 3', 'The 2-hour K\u207a comes back 3.2. HOLD insulin (Metabolic) and give the 40 mEq potassium bolus (Renal); notify the physician (under 4.0). Potassium recovers to about 3.6 by hour 3. Insulin restarts once K\u207a is over 3.3.'],
     ],
-    traps: 'Insulin with K\u207a under 3.3 causes VT within 2 hours. Potassium in the 1,000 mL/hr bolus runs 40 mEq/hr and triggers a warning. Forgetting to adjust insulin by the hourly change slows the whole course.',
+    traps: 'Keeping insulin running after the K\u207a of 3.2 costs 5 points and drives K\u207a toward 3.0; with no potassium in the bag it reaches 2.5 with PVCs. Potassium in the 1,000 mL/hr bolus runs 40 mEq/hr and triggers a rate warning.',
   },
   {
-    title: 'Scene 2: The drip (hours 4\u20138)',
+    title: 'Scene 2: The drip (hours 4\u20137)',
     goal: 'Titrate insulin by the hourly change, move to Stage 2 after two readings under 200, and clarify the unsafe order.',
     hours: [
-      ['Hour 4 \u2192 5', 'At 7 units/hr glucose falls about 80 (over 75), so Metabolic halves the rate to 3.5 units/hr.'],
-      ['Hour 5 \u2192 7', 'Glucose falls under 200 for two readings. Metabolic reduces insulin to 1.4 units/hr (0.02 units/kg/hr) and adds dextrose; Cardiovascular drops the rate to 150 mL/hr; the bag becomes Dextrose 5%\u20130.45% NaCl w/ 20 mEq K\u207a. K\u207a drifts toward 4.0: Renal notifies the physician if it falls under 4.0 and moves to 40 mEq per liter.'],
-      ['After hour 7: the provider\u2019s order', 'The provider orders the drip stopped because glucose is normal. The correct response is to clarify: BHB is still about 2\u20133 and the gap is open, so the DKA is NOT resolved. Metabolic calls with an SBAR. If the SBAR is clear, click Agree and say: \u201cGood catch. Keep the drip with dextrose.\u201d If they simply stop the drip, ketones rebound next hour.'],
+      ['Hour 4 \u2192 5', 'Glucose is 270 on 7 units/hr. With no change to judge yet, the rate stays; glucose falls about 80 to near 190.'],
+      ['Hour 5 \u2192 6', 'The fall was over 75, so Metabolic halves insulin to 3.5 units/hr. That is the first reading under 200. K\u207a drifts toward 4.0: Renal watches for the protocol\u2019s notify-under-4.0 rule.'],
+      ['Hour 6 \u2192 7', 'Second reading under 200: Stage 2. Insulin to 1.4 units/hr (0.02 units/kg/hr); the bag becomes Dextrose 5%\u20130.45% NaCl w/ 20 mEq K\u207a at 150 mL/hr; the physician is informed. At the same moment the provider orders the drip stopped. The correct response is to clarify with an SBAR: the anion gap is still about 21 and bicarbonate about 14, so the DKA is NOT resolved. If the SBAR is clear, click Agree and say: \u201cGood catch. Keep the drip with dextrose.\u201d'],
     ],
-    traps: 'Leaving insulin at 7 units/hr with no dextrose: glucose falls about 60\u201380 an hour and hits the hypoglycemia range by hour 8. Then the hypoglycemia section applies: D/C insulin, D50W by tier, restart at 50% or 75% of the last rate once over 140.',
+    traps: 'Leaving insulin at 7 units/hr with no dextrose: glucose falls about 60\u201380 an hour and reaches the hypoglycemia range by hour 7. Then the hypoglycemia section applies: D/C insulin, D50W by tier, restart at 50% or 75% of the last rate once over 140. Stopping the drip on the provider\u2019s order: ketones rebound and the gap stays open.',
   },
   {
-    title: 'Scene 3: Transition (hours 12\u201316)',
+    title: 'Scene 3: Transition (hours 12\u201315)',
     goal: 'Keep glucose 150\u2013200 on Stage 2, prove resolution, overlap basal insulin, then stop the drip.',
     hours: [
-      ['Hour 12 \u2192 13', 'On D5 at 150 mL/hr with 1.4 units/hr, glucose drifts up. Over 200, Metabolic titrates up 0.7 units/hr (max 3.5). Respiratory draws a gas; Metabolic orders a stat BHB.'],
-      ['Hour 13 \u2192 14', 'Resolution (BHB under 0.6 and HCO\u2083\u207b 18 or more) arrives. Jordan can eat, so Metabolic gives glargine subQ (home dose 18 units). The drip CONTINUES.'],
-      ['Hour 14 \u2192 16', 'One to two hours after the basal dose, Metabolic stops the drip and the dextrose. One table teaches sick-day rules; check them off on the instructor panel.'],
+      ['Hour 12 \u2192 13', 'On D5 at 150 mL/hr with 1.4 units/hr, glucose drifts up; over 200, Metabolic titrates up 0.7 units/hr (max 3.5). Renal orders a stat BMP to check the gap and bicarbonate.'],
+      ['Hour 13 \u2192 14', 'Resolved: anion gap under 12 and bicarbonate over 18. Jordan can eat, so Metabolic gives glargine SC (home dose 18 units). The drip CONTINUES.'],
+      ['Hour 14 \u2192 15', 'One to two hours after the basal dose, Metabolic stops the drip and the dextrose. One table teaches sick-day rules; check them off on the instructor panel.'],
     ],
-    traps: 'Stopping the drip with no basal on board: glucose and BHB climb back within 2 hours. Potassium drifts toward 3.7 by hour 16 if nobody is watching it.',
+    traps: 'Stopping the drip with no basal on board: glucose and ketones climb back within 2 hours. Potassium drifts toward 3.8 if nobody is watching it.',
   },
 ];
 
@@ -122,7 +122,7 @@ export const PROVIDER_CALLS = [
 
 export const DEBRIEF_KEY = [
   ['Where did K⁺ leave the green, and who saw it first?', 'Usually Cardiovascular (ECG change) before Renal (lab). The lag between a cue and an action is the point.'],
-  ['When the provider ordered the drip stopped, what showed the DKA was not resolved?', 'BHB still over 0.6 and the anion gap still open. Metabolic had both. Glucose alone never shows resolution; that is why Stage 2 adds dextrose instead of stopping insulin.'],
+  ['When the provider ordered the drip stopped, what showed the DKA was not resolved?', 'The anion gap was still over 12 and bicarbonate under 18. Metabolic had both numbers. Glucose alone never shows resolution; that is why Stage 2 adds dextrose instead of stopping insulin.'],
   ['Where did we beat the protocol-only patient?', 'The protocol-only patient waits for scheduled labs: K⁺ only at 2 hours then every 4, and glucose only every 2 hours. Anticipating and sharing cues closes that gap.'],
   ['Why does insulin lower serum potassium?', 'Insulin activates the Na⁺/K⁺-ATPase, moving K⁺ into cells. Correcting acidosis shifts it in too. Total body K⁺ was already low from osmotic diuresis.'],
   ['What will you teach Jordan?', 'Never skip basal insulin when sick. Check glucose every 2–4 hours and ketones when ill. Drink sugar-free fluids. Call early for vomiting or moderate/large ketones.'],
@@ -138,8 +138,8 @@ export const EXIT_TICKET = [
     a: 'It fell only 38 (under 50), so double the infusion to 7 units/hr (max 20 units/hr). Stage 1 aims for a fall of 50\u201375 mg/dL per hour.',
   },
   {
-    q: 'Glucose has read 188 and then 176. BHB is 1.8. The provider says to stop the insulin. What do you do and say?',
-    a: 'Do not stop it; clarify with SBAR. Two readings under 200 means Stage 2: reduce insulin to 0.02 units/kg/hr (1.4 units/hr), change to Dextrose 5% fluid at 150 mL/hr, and keep glucose 150\u2013200 until the DKA resolves (BHB is still 1.8).',
+    q: 'Glucose has read 188 and then 176. The anion gap is 18 and bicarbonate is 15. The provider says to stop the insulin. What do you do and say?',
+    a: 'Do not stop it; clarify with SBAR. The gap is 18 and bicarbonate 15, so DKA is not resolved (gap under 12 and bicarbonate over 18). Two readings under 200 means Stage 2: reduce insulin to 0.02 units/kg/hr (1.4 units/hr), change to Dextrose 5% fluid at 150 mL/hr, and keep glucose 150–200 until the DKA resolves.',
   },
 ];
 
@@ -155,8 +155,9 @@ export const SIMPLIFICATIONS = [
 ];
 
 export const KEY_TERMS = [
-  ['Anion gap', 'Na⁺ − (Cl⁻ + HCO₃⁻). Elevated in DKA from ketoacids; closing it shows ketoacids clearing.'],
-  ['Beta-hydroxybutyrate (BHB)', 'The main ketone in DKA. Under 0.6 mmol/L is part of the resolution criteria.'],
+  ['Anion gap', 'Na⁺ − (Cl⁻ + HCO₃⁻). Elevated in DKA from ketoacids; under 12 (with bicarbonate over 18) means resolved.'],
+  ['Beta-hydroxybutyrate (BHB)', 'The main ketone in DKA. It falls as insulin clears the ketoacids.'],
+  ['DKA resolution', 'Anion gap under 12 and serum bicarbonate over 18. Glucose alone never shows resolution.'],
   ['Corrected sodium', 'Measured Na⁺ + 0.024 × (glucose − 100) (Hillier, 1999). High glucose pulls water into the blood and lowers measured sodium. Over 132: 0.45% NaCl.'],
   ['Kussmaul respirations', 'Deep, rapid breathing that blows off CO₂ to buffer metabolic acidosis.'],
   ['Osmotic diuresis', 'Glucose in the urine pulls water and electrolytes out with it, causing dehydration and potassium loss.'],

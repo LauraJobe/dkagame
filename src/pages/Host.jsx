@@ -15,7 +15,6 @@ export default function Host() {
   const [code, setCode] = useState(null);
   const [game, setGame] = useState(null);
   const [tables, setTables] = useState({});
-  const [variant, setVariant] = useState('A');
   const [showTruth, setShowTruth] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -56,7 +55,7 @@ export default function Host() {
     setBusy(true);
     setError('');
     try {
-      const g = newGame(variant);
+      const g = newGame();
       const c = await createRoom(uid, g);
       try { localStorage.setItem(STORE_KEY, c); } catch {}
       setGame(g);
@@ -144,11 +143,7 @@ export default function Host() {
         <div className="home-card">
           <div className="eyebrow">Instructor</div>
           <h1>Start a DKA room</h1>
-          <fieldset className="variant">
-            <legend>Arrival potassium</legend>
-            <label><input type="radio" checked={variant === 'A'} onChange={() => setVariant('A')} /> Version A: K⁺ 5.6 (high on arrival; the drop comes later)</label>
-            <label><input type="radio" checked={variant === 'B'} onChange={() => setVariant('B')} /> Version B: K⁺ 3.2 (insulin must wait)</label>
-          </fieldset>
+          <p className="lead">Jordan Reyes, 22, arrives in severe DKA with K⁺ 3.8. Three scenes; you run each hour.</p>
           <button className="btn btn-primary btn-lg" disabled={busy} onClick={create}>Create room</button>
           {error && <p className="error">{error}</p>}
           <div className="home-links">

@@ -12,14 +12,14 @@ export const SCENES = [
       'Jordan Reyes, 22, type 1 diabetes since age 12. Flu for 3 days, stopped eating, skipped insulin. 70 kg. ' +
       'The ED drew labs and gave 1 liter of 0.9% NaCl; it is now running at 250 mL/hr. No insulin yet. ' +
       'Admitting labs are on your monitors. Follow the DKA/HHS protocol: tap DKA protocol on your screen.',
-    preset: (variant) => ({
+    preset: () => ({
       hour: 0,
       deficitL: 4.0,
       glucose: 512,
       bhb: 6.8,
       hco3: 6,
       paco2: 22,
-      k: variant === 'B' ? 3.2 : 5.6,
+      k: 3.8, // low but over 3.3: insulin can start, then K+ falls under 3.3 by the 2-hour lab
       na: 131,
       cl: 98,
       bun: 32,
@@ -41,15 +41,15 @@ export const SCENES = [
   {
     id: 'drip',
     title: 'Scene 2: The drip',
-    hours: 'Hours 4–8',
-    beats: 4,
+    hours: 'Hours 4–7',
+    beats: 3,
     report:
-      'Hour 4. Insulin was doubled to 7 units/hr an hour ago. 0.45% NaCl with 20 mEq K⁺ is running at 250 mL/hr. ' +
+      'Hour 4. Insulin was doubled to 7 units/hr an hour ago; glucose is 270. 0.45% NaCl with 20 mEq K⁺ is running at 250 mL/hr. ' +
       'Jordan is less drowsy. Keep titrating insulin by the hourly glucose change, and watch for two readings under 200.',
     preset: () => ({
       hour: 4,
       deficitL: 1.4,
-      glucose: 330,
+      glucose: 270,
       bhb: 4.2,
       hco3: 12.5,
       paco2: 27,
@@ -65,7 +65,7 @@ export const SCENES = [
     }),
     orders: { ...DEFAULT_ORDERS, fluidType: 'HALF', fluidRate: 250, kclPerL: 20, insulinUnits: 7 },
     cards: {
-      3: (p) => ({
+      2: (p) => ({
         table: 'metabolic',
         severity: 'info',
         title: 'New provider order',
@@ -77,8 +77,8 @@ export const SCENES = [
   {
     id: 'transition',
     title: 'Scene 3: Transition',
-    hours: 'Hours 12–16',
-    beats: 4,
+    hours: 'Hours 12–15',
+    beats: 3,
     report:
       'Hour 12. Jordan is awake, alert, and asking for breakfast. Stage 2: insulin at 0.02 units/kg/hr (1.4 units/hr), ' +
       'Dextrose 5%–0.45% NaCl with 20 mEq K⁺ at 150 mL/hr. Home regimen: glargine 18 units daily plus lispro with meals.',
@@ -86,12 +86,12 @@ export const SCENES = [
       hour: 12,
       deficitL: 0.3,
       glucose: 178,
-      bhb: 0.8,
-      hco3: 17.5,
-      paco2: 33,
+      bhb: 0.6,
+      hco3: 18.5,
+      paco2: 34,
       k: 4.1,
       na: 139,
-      cl: 106,
+      cl: 108,
       bun: 16,
       cr: 0.95,
       phos: 1.8,

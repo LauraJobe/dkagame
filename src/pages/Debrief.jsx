@@ -5,6 +5,8 @@ import { TABLES } from '../engine/game.js';
 const METRICS = [
   { key: 'k', label: 'Potassium', unit: 'mEq/L', green: [4.0, 5.0], domain: [1.5, 6.5] },
   { key: 'glucose', label: 'Glucose', unit: 'mg/dL', green: [150, 250], domain: [0, 550] },
+  { key: 'ag', label: 'Anion gap', unit: '', green: [5, 12], domain: [5, 30] },
+  { key: 'hco3', label: 'Bicarbonate', unit: 'mEq/L', green: [18, 26], domain: [0, 28] },
   { key: 'bhb', label: 'Beta-hydroxybutyrate', unit: 'mmol/L', green: [0, 0.6], domain: [0, 8] },
   { key: 'ph', label: 'pH', unit: '', green: [7.3, 7.45], domain: [6.8, 7.5] },
   { key: 'map', label: 'MAP', unit: 'mmHg', green: [65, 100], domain: [40, 105] },

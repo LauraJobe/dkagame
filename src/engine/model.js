@@ -175,7 +175,7 @@ export function step(prev, o) {
 
   // ---- ketones ----
   const glucoseAvailable = prev.glucose >= 120 || (o.dextrose || 0) > 0;
-  const dB = effF > 0 ? -0.9 * effF * (glucoseAvailable ? 1 : 0.6) : 0.3;
+  const dB = effF > 0 ? -0.9 * effF * (glucoseAvailable ? 1 : 0.6) : 0.5;
   s.bhb = clamp(prev.bhb + dB, 0.2, 9);
 
   // ---- chloride / sodium ----
@@ -275,7 +275,8 @@ export function step(prev, o) {
   if (mEq > 20) events.push(card('renal', 'warn', 'Potassium infusing too fast',
     `Potassium is running at ${Math.round(mEq)} mEq/hr. The protocol requires a provider call before potassium runs above 10 mEq/hr with a bolus.`));
   const dripWasRunning = prev.dripOnLast ?? prev.dripWasOn;
-  if (dripWasRunning && !dripOn && basalEff < 0.45) {
+  // A hold for low K+ or low glucose is the protocol, not a missed overlap.
+  if (dripWasRunning && !dripOn && basalEff < 0.45 && prev.k >= 3.3 && prev.glucose >= 100) {
     events.push(card('metabolic', 'warn', 'Drip off, no basal coverage',
       'The insulin drip stopped while ketones are still present and basal insulin is not yet covering.'));
   }
@@ -293,8 +294,9 @@ function safety(s, events, table, title, text) {
 }
 
 // ---- resolution ----
+// Course definition: anion gap under 12 and serum bicarbonate over 18.
 export function isResolved(p) {
-  return p.bhb < 0.6 && (p.ph >= 7.3 || p.hco3 >= 18);
+  return p.na - p.cl - p.hco3 < 12 && p.hco3 > 18;
 }
 
 // ---- scoring ----

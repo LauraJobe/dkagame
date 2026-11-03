@@ -45,7 +45,7 @@ export function botOrders(labs, current, hour, startHour) {
   }
 
   // Insulin.
-  const resolved = labs.bhb && labs.bhb.value < 0.6 && labs.bmp && labs.bmp.hco3 >= 18;
+  const resolved = labs.bmp && labs.bmp.ag < 12 && labs.bmp.hco3 > 18;
   let u = current.insulinUnits || 0;
   if (o.basalGivenHour != null && hour - o.basalGivenHour >= 2) {
     u = 0; // transition complete

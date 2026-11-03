@@ -45,14 +45,14 @@ export function mergeOrders(running, tableOrders = {}, approvals = {}) {
   return merged;
 }
 
-export function newGame(variant = 'A') {
-  return startScene({ variant, sceneIdx: 0, results: [] }, 0);
+export function newGame() {
+  return startScene({ sceneIdx: 0, results: [] }, 0);
 }
 
 export function startScene(game, sceneIdx) {
   const scene = SCENES[sceneIdx];
-  const patient = makePatient(scene.preset(game.variant));
-  const botPatient = makePatient(scene.preset(game.variant));
+  const patient = makePatient(scene.preset());
+  const botPatient = makePatient(scene.preset());
   const first = snapshot(patient, null);
   return {
     ...game,
@@ -85,11 +85,23 @@ function clearOneTime(o) {
 
 export function runBeat(game, orders) {
   const scene = SCENES[game.sceneIdx];
-  const startHour = scene.preset(game.variant).hour;
+  const startHour = scene.preset().hour;
 
   // Class patient
   const { patient, events } = step(game.patient, orders);
   const score = scoreBeat(patient, game.patient);
+  // Protocol: insulin is held while the most recent K+ result is under 3.3.
+  const labK = game.labs?.bmp?.k;
+  if (labK != null && labK < 3.3 && (orders.insulinUnits || 0) > 0) {
+    events.push({
+      table: 'metabolic',
+      severity: 'danger',
+      title: 'Insulin ran with K\u207a under 3.3',
+      text: `The last K\u207a was ${labK}. The protocol says HOLD insulin and give 40 mEq K\u207a until K\u207a is over 3.3.`,
+    });
+    score.total = Math.max(0, score.total - 5);
+    score.penalty = (score.penalty || 0) + 5;
+  }
   const labs = updateClassLabs(game.labs, patient, orders);
   const beat = game.beat + 1;
   const cards = [...events];

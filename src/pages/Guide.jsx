@@ -49,7 +49,7 @@ export default function Guide() {
       <ul>
         <li>Devices: one per table (phone, tablet, or Chromebook) plus your laptop. Any browser works; no app or login.</li>
         <li>Print the role cards, the protocol, and the exit tickets from <a href="#/print">Print student materials</a>.</li>
-        <li>Open the instructor dashboard, choose <strong>Version A</strong> (K⁺ 5.6, first run) or <strong>Version B</strong> (K⁺ 3.2, insulin must wait), and create a room.</li>
+        <li>Open the instructor dashboard and create a room.</li>
         <li>Click <strong>Open projector view</strong>, move that window to the classroom screen, and click Full screen. Keep the dashboard and its instructor panel off the projector.</li>
         <li>Classes of 12–14: run four tables and have the Respiratory table also cover Neuro.</li>
       </ul>
