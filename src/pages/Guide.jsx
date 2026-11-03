@@ -19,7 +19,7 @@ export default function Guide() {
 
       <h1>DKA: One Patient, Five Tables. Teacher Guide</h1>
       <p className="doc-lead">
-        Adult severe DKA, three 5-minute scenes plus a debrief, about 30–35 minutes. Runs on the hospital DKA/HHS
+        Adult severe DKA, three scenes plus a debrief, about 45 minutes. Runs on the hospital DKA/HHS
         Treatment Protocol. For NUR 4206 (Advanced Med-Surg/ICU) or pharmacology.
       </p>
 
@@ -51,7 +51,6 @@ export default function Guide() {
         <li>Print the role cards, the protocol, and the exit tickets from <a href="#/print">Print student materials</a>.</li>
         <li>Open the instructor dashboard, choose <strong>Version A</strong> (K⁺ 5.6, first run) or <strong>Version B</strong> (K⁺ 3.2, insulin must wait), and create a room.</li>
         <li>Click <strong>Open projector view</strong>, move that window to the classroom screen, and click Full screen. Keep the dashboard and its instructor panel off the projector.</li>
-        <li>Choose the hour length before you start: <strong>5 minutes per scene</strong> (default), 8 minutes, or untimed. When the timer runs out, or every joined table taps Ready, the hour runs by itself.</li>
         <li>Classes of 12–14: run four tables and have the Respiratory table also cover Neuro.</li>
       </ul>
 
@@ -89,9 +88,9 @@ export default function Guide() {
       </table>
       <p>
         <strong>Each hour:</strong> tables read their monitors, Callers gather numbers, the table agrees on orders, and
-        the Dialer taps Ready. The hour runs when the countdown ends or when every joined table is ready, whichever
-        comes first. Tables that miss the countdown keep their last orders. You can pause the clock or run the hour early
-        from the dashboard.
+        the Dialer taps Ready. When the tiles fill in on the projector, click <strong>Run hour</strong>. You set the
+        pace: run it as soon as everyone is ready, or hold the hour to talk through a decision. Tables that are not
+        ready keep their last orders.
       </p>
 
       <h2>Scene-by-scene facilitation and answer key</h2>

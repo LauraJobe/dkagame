@@ -4,7 +4,6 @@ import { listen } from '../room.js';
 import { TABLES } from '../engine/game.js';
 import Debrief from './Debrief.jsx';
 import Patient from '../components/Patient.jsx';
-import Countdown from '../components/Countdown.jsx';
 
 // Read-only view for the classroom screen. The instructor runs the game from
 // the instructor page on a laptop or tablet; this window goes on the projector.
@@ -65,7 +64,6 @@ export default function Screen({ code }) {
           <div className="ss-title">{meta?.sceneTitle || 'Waiting for the instructor'}</div>
           {meta && <div className="ss-hour">Hour {meta.hour}</div>}
           {meta && <div className="ss-beat">Beat {meta.beat} of {meta.beats}</div>}
-          {meta?.status === 'ordering' && <Countdown clock={meta.clock} />}
         </div>
       </header>
 

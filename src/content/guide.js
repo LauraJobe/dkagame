@@ -71,9 +71,9 @@ export const JOBS = [
 export const FLOW = [
   ['Set up', '5 min', 'Seat five tables, one device each. Project the projector view. Tables join with the room code and assign jobs.'],
   ['Opening', '3 min', 'Read the shift report aloud. Point every table to the DKA protocol button. Remind them: no table sees everything.'],
-  ['Scene 1: Arrival', '5 min', 'Hours 0–3. Three hours, about 100 seconds each. Fluids, potassium, then insulin at 0.05 units/kg/hr.'],
-  ['Scene 2: The drip', '5 min', 'Hours 4–8. Four hours, about 75 seconds each. Hourly titration, Stage 2 after two readings under 200, and the provider’s stop-the-drip order.'],
-  ['Scene 3: Transition', '5 min', 'Hours 12–16. Four hours, about 75 seconds each. Confirm resolution, give basal insulin, overlap, stop the drip, teach sick-day rules.'],
+  ['Scene 1: Arrival', '8–10 min', 'Hours 0–3. Three hours. Fluids, potassium, then insulin at 0.05 units/kg/hr.'],
+  ['Scene 2: The drip', '10–12 min', 'Hours 4–8. Four hours. Hourly titration, Stage 2 after two readings under 200, and the provider’s stop-the-drip order.'],
+  ['Scene 3: Transition', '8–10 min', 'Hours 12–16. Four hours. Confirm resolution, give basal insulin, overlap, stop the drip, teach sick-day rules.'],
   ['Debrief', '12 min', 'Project the graphs. Our Jordan against the protocol-only Jordan.'],
   ['Exit ticket', '5 min', 'Three questions on paper (print materials).'],
 ];

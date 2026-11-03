@@ -375,14 +375,6 @@ p { line-height: 1.5; }
 .doc-protocol { border: 1px solid var(--line); border-radius: 12px; padding: 0.8rem 1rem; }
 .sheet.protocol-sheet { min-height: auto; }
 
-/* Countdown */
-.countdown { font-family: 'JetBrains Mono', monospace; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 8px; background: rgba(255,255,255,0.12); display: inline-block; }
-.countdown.soon { background: #b45309; color: #fff; animation: act-now 1s ease-in-out infinite; }
-.countdown.paused { background: #475569; color: #fff; }
-.table-screen .countdown { margin-top: 0.3rem; font-size: 1rem; }
-.screen .countdown { font-size: clamp(1.2rem, 2.2vw, 1.8rem); margin-top: 0.3rem; background: rgba(255,255,255,0.15); }
-.timing { display: grid; gap: 0.4rem; }
-.clock-ctl { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
 .modal-back { z-index: 50; }
 .ready-bar { z-index: 5; }
 /* A new or changed IV bag slides onto the pole once. */

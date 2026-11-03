@@ -6,7 +6,6 @@ import { TABLES } from '../engine/game.js';
 import { ORDER_SPEC } from '../ui/orderSpec.js';
 import ProtocolPanel from '../components/ProtocolPanel.jsx';
 import Cutaway from '../components/Cutaway.jsx';
-import Countdown from '../components/Countdown.jsx';
 
 export default function TableView({ code, tableId }) {
   const table = TABLES.find((t) => t.id === tableId);
@@ -81,7 +80,6 @@ export default function TableView({ code, tableId }) {
         <div className="clock">
           <div className="clock-hour">Hour {hour}</div>
           <div className="clock-scene">{meta?.sceneTitle || 'Waiting for instructor'}</div>
-          {meta?.status === 'ordering' && <Countdown clock={meta.clock} />}
         </div>
       </header>
 

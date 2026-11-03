@@ -43,7 +43,6 @@ export function metaFor(game) {
     variant: game.variant,
     cards: game.cards || [],
     status5: tableStatus(game.lastScore && game.beat > 0 ? game.lastScore : null),
-    clock: game.clock || null,
   };
 }
 
@@ -91,16 +90,3 @@ export function listen(code, path, cb) {
 }
 
 export { update, set, get };
-
-// Firebase's estimate of (server time - this device's time), so every screen counts down together.
-let serverOffset = 0;
-export function watchServerOffset() {
-  try {
-    return onValue(ref(db, '.info/serverTimeOffset'), (snap) => {
-      serverOffset = Number(snap.val()) || 0;
-    });
-  } catch {
-    return () => {};
-  }
-}
-export const serverNow = () => Date.now() + serverOffset;
