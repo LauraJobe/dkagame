@@ -8,13 +8,12 @@ export const ORDER_SPEC = {
         { value: 'NS', label: '0.9% NaCl' },
         { value: 'HALF', label: '0.45% NaCl' },
       ],
-      note: 'Corrected Na⁺ over 132: 0.45%. Under 132: 0.9%.',
     },
     {
       key: 'fluidRate', label: 'Rate', kind: 'select',
       options: [
         { value: 0, label: 'Off / KVO' },
-        { value: 150, label: '150 mL/hr (with dextrose)' },
+        { value: 150, label: '150 mL/hr' },
         { value: 250, label: '250 mL/hr' },
         { value: 500, label: '500 mL/hr' },
         { value: 1000, label: '1,000 mL/hr (bolus)' },
@@ -25,7 +24,6 @@ export const ORDER_SPEC = {
     {
       key: 'kclPerL', label: 'K⁺ added to the IV fluid', kind: 'select',
       options: [0, 20, 40].map((v) => ({ value: v, label: v === 0 ? 'None' : `${v} mEq per liter` })),
-      note: 'K⁺ over 5.3: none. 4.0–5.3: 20. Under 4.0: 40.',
     },
     { key: 'kBolus', label: 'Potassium bolus 40 mEq (runs over 4 hours)', kind: 'action' },
     { key: 'bmpNow', label: 'Stat BMP', kind: 'action' },
@@ -39,7 +37,6 @@ export const ORDER_SPEC = {
         { value: 0, label: 'None' },
         { value: 5, label: 'Dextrose 5%' },
       ],
-      note: 'After 2 readings under 200: add dextrose and run at 150 mL/hr (tell Cardiovascular).',
     },
     {
       key: 'd50', label: 'D50W IV push this hour', kind: 'select',

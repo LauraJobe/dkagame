@@ -7,7 +7,7 @@ export const TABLE_INFO = {
     controls: ['IV fluid: 0.9% or 0.45% NaCl (by corrected sodium)', 'IV rate: bolus 1,000, 250, or 150 mL/hr with dextrose'],
     protocol: ['fluids', 'potassium', 'monitoring'],
     ask: [
-      'Renal: what is the latest K⁺? (With the corrected sodium on your monitor, it decides which bag you hang.)',
+      'Renal: what is the latest K⁺? (Check it against the IV fluids table in the protocol.)',
       'Renal: is urine output 50 mL/hr or more yet?',
       'Respiratory: any crackles or falling SpO₂? (Too much fluid?)',
       'Metabolic: has glucose been under 200 twice? (Then dextrose at 150 mL/hr.)',
@@ -32,7 +32,7 @@ export const TABLE_INFO = {
     ask: [
       'Metabolic: is the insulin drip running, and at what rate?',
       'Cardiovascular: what does the ECG show? What rate are the fluids? (Your KCl is per liter of that fluid.)',
-      'Cardiovascular: which bag is hanging? (Corrected sodium over 132 means 0.45% NaCl.)',
+      'Cardiovascular: which bag is hanging, and at what rate?',
     ],
   },
   metabolic: {

@@ -187,15 +187,12 @@ function InsulinControl({ value, disabled, onChange }) {
         <span className="unit-label">units/hr</span>
       </div>
       <div className="insulin-btns">
-        <button className="btn btn-ghost" disabled={disabled} onClick={() => set(3.5)}>Start 3.5</button>
         <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(u * 2)}>Double</button>
         <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(u / 2)}>Halve</button>
-        <button className="btn btn-ghost" disabled={disabled} onClick={() => set(1.4)}>Stage 2: 1.4</button>
         <button className="btn btn-ghost" disabled={disabled} onClick={() => set(u + 0.7)}>+0.7</button>
         <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(u - 0.7)}>−0.7</button>
         <button className="btn btn-ghost" disabled={disabled || !u} onClick={() => set(0)}>Stop</button>
       </div>
-      <p className="order-note">Stage 1: change under 50 or rising, double (max 20). Down 50–75, keep. Down over 75, halve. 0.01 units/kg/hr = 0.7 units/hr.</p>
     </div>
   );
 }

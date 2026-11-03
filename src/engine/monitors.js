@@ -60,7 +60,6 @@ export function buildMonitors(game) {
   // The BMP is drawn every 2 hours on even hours; corrected sodium comes calculated with it.
   const nextBmp = hour % 2 === 0 ? hour + 2 : hour + 1;
   const cNa = lab('Corrected Na⁺', L.bmp.correctedNa, 'mEq/L', L.bmp.hour);
-  cNa.note = L.bmp.correctedNa > 132 ? 'over 132: 0.45% NaCl' : 'under 132: 0.9% NaCl';
   const cardio = [
     live('IV running', `${bagName(o)} at ${o.fluidRate || 0} mL/hr`, ''),
     cNa,
