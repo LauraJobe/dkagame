@@ -380,3 +380,5 @@ p { line-height: 1.5; }
 /* A new or changed IV bag slides onto the pole once. */
 .iv-bag-in { animation: iv-bag-in 0.9s cubic-bezier(.2,.8,.3,1) 1; }
 @keyframes iv-bag-in { from { transform: translateY(-60px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.reading-note { font-size: 0.75rem; color: #c4d3cc; margin-top: 0.15rem; }

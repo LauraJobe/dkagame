@@ -3,11 +3,11 @@
 export const TABLE_INFO = {
   cardio: {
     role: 'You manage Jordan’s circulation and IV fluids. You are the first to see potassium trouble, because it shows up on the ECG before the lab comes back.',
-    sees: ['Heart rate, blood pressure, MAP', 'Capillary refill, temperature', 'ECG rhythm strip'],
+    sees: ['The IV running and the corrected sodium (calculated for you)', 'Heart rate, blood pressure, MAP', 'Capillary refill, temperature', 'ECG rhythm strip'],
     controls: ['IV fluid: 0.9% or 0.45% NaCl (by corrected sodium)', 'IV rate: bolus 1,000, 250, or 150 mL/hr with dextrose'],
     protocol: ['fluids', 'potassium', 'monitoring'],
     ask: [
-      'Renal: what are the latest K⁺ and sodium? (They decide which bag you hang.)',
+      'Renal: what is the latest K⁺? (With the corrected sodium on your monitor, it decides which bag you hang.)',
       'Renal: is urine output 50 mL/hr or more yet?',
       'Respiratory: any crackles or falling SpO₂? (Too much fluid?)',
       'Metabolic: has glucose been under 200 twice? (Then dextrose at 150 mL/hr.)',
@@ -26,13 +26,13 @@ export const TABLE_INFO = {
   },
   renal: {
     role: 'You manage the kidneys, electrolytes, and potassium replacement. Insulin pushes potassium into the cells, so the number on your lab will fall fast once the drip starts.',
-    sees: ['Urine output and intake/output totals', 'BMP: K⁺, Na⁺, Cl⁻, BUN, creatinine, phosphate (every 2 hours or stat)'],
+    sees: ['Urine output and intake/output totals', 'BMP every 2 hours or stat: K⁺, Na⁺, corrected Na⁺ (calculated for you), Cl⁻, BUN, creatinine, phosphate'],
     controls: ['K⁺ added to the IV fluid: 0, 20, or 40 mEq per liter', 'Potassium bolus 40 mEq (runs over 4 hours)', 'Stat BMP', 'Phosphate replacement (provider order)'],
     protocol: ['fluids', 'potassium', 'monitoring'],
     ask: [
       'Metabolic: is the insulin drip running, and at what rate?',
       'Cardiovascular: what does the ECG show? What rate are the fluids? (Your KCl is per liter of that fluid.)',
-      'Metabolic: what is the glucose? (You need it to correct the sodium: Na\u207a + 0.024 \u00d7 (glucose \u2212 100).)',
+      'Cardiovascular: which bag is hanging? (Corrected sodium over 132 means 0.45% NaCl.)',
     ],
   },
   metabolic: {
@@ -84,7 +84,7 @@ export const SCENE_KEYS = [
     goal: 'Finish the NS bolus, start insulin at 0.05 units/kg/hr (K\u207a 3.8 is over 3.3), replace potassium, and HOLD insulin when K\u207a falls under 3.3.',
     hours: [
       ['Hour 0 \u2192 1', 'Cardiovascular gives the second liter of 0.9% NaCl as a bolus (1,000 mL/hr), with no potassium in it. K\u207a 3.8 is over 3.3, so Metabolic starts insulin at 3.5 units/hr. K\u207a is under 4.0, so the next bag needs 40 mEq.'],
-      ['Hour 1 \u2192 2', 'Corrected sodium is about 141 (131 + 0.024 \u00d7 412), so the bag becomes 0.45% NaCl w/ 40 mEq K\u207a at 250 mL/hr. Cardiovascular\u2019s ECG already shows flattened T waves: a cue to ask Renal for a stat BMP.'],
+      ['Hour 1 \u2192 2', 'The monitors show corrected sodium about 141 (over 132), so the bag becomes 0.45% NaCl w/ 40 mEq K\u207a at 250 mL/hr. Cardiovascular\u2019s ECG already shows flattened T waves: a cue to ask Renal for a stat BMP.'],
       ['Hour 2 \u2192 3', 'The 2-hour K\u207a comes back 3.1. HOLD insulin (Metabolic) and give the 40 mEq potassium bolus (Renal); notify the physician (under 4.0). The bolus runs 10 mEq/hr over 4 hours, so K\u207a rises only slowly (about 3.2 by hour 3) and insulin stays held for the rest of the scene. Insulin restarts only once a K\u207a over 3.3 comes back.'],
 
     ],

@@ -57,8 +57,13 @@ export function buildMonitors(game) {
   const live = (label, value, unit, tone) => ({ label, value, unit, kind: 'live', tone: tone || null });
 
   const o = game.orders || {};
+  // The BMP is drawn every 2 hours on even hours; corrected sodium comes calculated with it.
+  const nextBmp = hour % 2 === 0 ? hour + 2 : hour + 1;
+  const cNa = lab('Corrected Na⁺', L.bmp.correctedNa, 'mEq/L', L.bmp.hour);
+  cNa.note = L.bmp.correctedNa > 132 ? 'over 132: 0.45% NaCl' : 'under 132: 0.9% NaCl';
   const cardio = [
     live('IV running', `${bagName(o)} at ${o.fluidRate || 0} mL/hr`, ''),
+    cNa,
     live('Heart rate', Math.round(p.hr), 'bpm', p.hr > 110 ? 'warn' : null),
     live('Blood pressure', `${p.sbp}/${p.dbp}`, 'mmHg'),
     live('MAP', Math.round(p.map), 'mmHg', p.map < 65 ? 'warn' : null),
@@ -84,6 +89,8 @@ export function buildMonitors(game) {
     live('Output total', p.totalOut, 'mL'),
     lab('K⁺', L.bmp.k, 'mEq/L', L.bmp.hour),
     lab('Na⁺', L.bmp.na, 'mEq/L', L.bmp.hour),
+    cNa,
+    live('Next BMP', `hour ${nextBmp}`, ''),
     lab('Cl⁻', L.bmp.cl, 'mEq/L', L.bmp.hour),
     lab('BUN', L.bmp.bun, 'mg/dL', L.bmp.hour),
     lab('Creatinine', L.bmp.cr, 'mg/dL', L.bmp.hour),
@@ -91,6 +98,7 @@ export function buildMonitors(game) {
   ];
 
   const metabolic = [
+    live('Next BMP', `hour ${nextBmp}`, ''),
     live('POC glucose', L.poc.value, 'mg/dL', L.poc.value < 70 || L.poc.value > 250 ? 'warn' : null),
     live('Last hour', L.pocPrev ? L.pocPrev.value : '—', 'mg/dL'),
     live('Change this hour', L.pocPrev ? `${L.poc.value - L.pocPrev.value > 0 ? '+' : ''}${L.poc.value - L.pocPrev.value}` : '—', 'mg/dL'),

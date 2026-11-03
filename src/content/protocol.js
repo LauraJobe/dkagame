@@ -147,7 +147,7 @@ export const COURSE_NOTES = {
   tables: ['cardio', 'resp', 'renal', 'metabolic', 'neuro'],
   items: [
     'Insulin doses for 70 kg: 0.1 units/kg bolus = 7 units; 0.05 units/kg/hr = 3.5 units/hr; 0.02 units/kg/hr = 1.4 units/hr; 0.01 units/kg/hr = 0.7 units/hr.',
-    'Corrected sodium: add 2.4 to the measured sodium for every 100 mg/dL of glucose over 100.',
+    'Corrected sodium is calculated for you with every BMP and shown on the Cardiovascular and Renal monitors. The BMP is drawn every 2 hours.',
     'DKA resolved when the anion gap is under 12 AND serum bicarbonate is over 18.',
     'Provider order required: insulin bolus, sodium bicarbonate (only if pH under 7.0), intubation, mannitol, phosphate replacement, and any change outside this protocol.',
     'Neuro checks every hour with head of bed 30°. Report any drop in GCS or new headache.',

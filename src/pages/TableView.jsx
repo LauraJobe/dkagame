@@ -120,6 +120,7 @@ export default function TableView({ code, tableId }) {
                 {row.value}
                 {row.unit && <span className="unit"> {row.unit}</span>}
               </div>
+              {row.note && <div className="reading-note">{row.note}</div>}
               {row.kind === 'lab' && (
                 <div className={`drawn ${stale ? 'stale' : ''}`}>
                   {stale ? `drawn hour ${row.drawn}` : 'new this hour'}
