@@ -24,10 +24,13 @@ describe('scene 1: potassium', () => {
     expect(g.labs.bmp.k).toBeLessThan(3.3);
   });
 
-  it('holding insulin with the K bolus brings potassium back over 3.3', () => {
+  it('holding insulin with the K bolus raises potassium slowly', () => {
     let g = play(newGame(), [{ fluidRate: 1000, insulinUnits: 3.5 }, { fluidType: 'HALF', fluidRate: 250, kclPerL: 40 }]);
+    const before = g.patient.k;
     g = runBeat(g, { ...g.orders, insulinUnits: 0, kBolus: true });
-    expect(g.patient.k).toBeGreaterThan(3.3);
+    expect(g.patient.k).toBeGreaterThan(before);
+    expect(g.patient.k - before).toBeLessThan(0.3);
+    expect(g.patient.kBolusLeft).toBe(4);
     expect(g.allCards.map((c) => c.title)).not.toContain('Insulin ran with K\u207a under 3.3');
   });
 

@@ -85,9 +85,10 @@ export const SCENE_KEYS = [
     hours: [
       ['Hour 0 \u2192 1', 'Cardiovascular gives the second liter of 0.9% NaCl as a bolus (1,000 mL/hr), with no potassium in it. K\u207a 3.8 is over 3.3, so Metabolic starts insulin at 3.5 units/hr. K\u207a is under 4.0, so the next bag needs 40 mEq.'],
       ['Hour 1 \u2192 2', 'Corrected sodium is about 141 (131 + 0.024 \u00d7 412), so the bag becomes 0.45% NaCl w/ 40 mEq K\u207a at 250 mL/hr. Cardiovascular\u2019s ECG already shows flattened T waves: a cue to ask Renal for a stat BMP.'],
-      ['Hour 2 \u2192 3', 'The 2-hour K\u207a comes back 3.2. HOLD insulin (Metabolic) and give the 40 mEq potassium bolus (Renal); notify the physician (under 4.0). Potassium recovers to about 3.6 by hour 3. Insulin restarts once K\u207a is over 3.3.'],
+      ['Hour 2 \u2192 3', 'The 2-hour K\u207a comes back 3.1. HOLD insulin (Metabolic) and give the 40 mEq potassium bolus (Renal); notify the physician (under 4.0). The bolus runs 10 mEq/hr over 4 hours, so K\u207a rises only slowly (about 3.2 by hour 3) and insulin stays held for the rest of the scene. Insulin restarts only once a K\u207a over 3.3 comes back.'],
+
     ],
-    traps: 'Keeping insulin running after the K\u207a of 3.2 costs 5 points and drives K\u207a toward 3.0; with no potassium in the bag it reaches 2.5 with PVCs. Potassium in the 1,000 mL/hr bolus runs 40 mEq/hr and triggers a rate warning.',
+    traps: 'Keeping insulin running after the K\u207a of 3.1 costs 5 points and drives K\u207a to about 2.8 with U waves; with no potassium in the bag it falls further, with PVCs. Potassium in the 1,000 mL/hr bolus runs 40 mEq/hr and triggers a rate warning.',
   },
   {
     title: 'Scene 2: The drip (hours 4\u20137)',

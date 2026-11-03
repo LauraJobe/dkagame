@@ -213,11 +213,11 @@ export function step(prev, o) {
   const acidF = clamp((7.4 - prev.ph) / 0.3, 0.25, 1);
   let dK = -0.75 * effF * acidF; // insulin drives K into cells
   dK -= 0.12 * rateL; // dilution
-  if (prev.uo > 50) dK -= 0.12; // urinary loss
+  if (prev.uo > 50) dK -= 0.06; // urinary loss
   s.kBolusLeft = o.kBolus ? 4 : Math.max(0, (prev.kBolusLeft || 0) - 1);
   const bolusRunning = o.kBolus || (prev.kBolusLeft || 0) > 0;
   const mEq = (o.kclPerL || 0) * rateL + (bolusRunning ? 10 : 0) + (o.kRider ? 10 : 0);
-  dK += mEq * 0.028;
+  dK += mEq * 0.012; // 10 mEq/hr raises serum K+ only about 0.1: a 40 mEq bolus works over 4 hours
   if (o.bicarb) dK -= 0.5;
   if (s.ph < prev.ph - 0.05) dK += 0.3; // worsening acidosis shifts K out
   s.k = clamp(prev.k + dK, 1.6, 8);
